@@ -1,16 +1,25 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
-function App() {
-  const [count, setCount] = useState(0)
+import Dashboard from "./pages/patient/Dashboard";
+import PatientRoute from "./routing/PatientRoute";
+import Login from './pages/auth/Login';
+import Register from "./pages/auth/RegisterPatient";
 
+export default function App() {
   return (
-    <div>
-      <h1>App Component</h1>
-    </div>
-  )
-}
+    <Routes>
 
-export default App
+      {/* Public */}
+      <Route path="/" element={<Navigate to="/login" />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+
+
+      {/* Patient Protected */}
+      <Route path="/patient" element={<PatientRoute />}>
+        <Route path="dashboard" element={<Dashboard />} />
+      </Route>
+
+    </Routes>
+  );
+}
