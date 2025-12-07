@@ -13,6 +13,7 @@ import System from './pages/patient/Patient_Settings/System';
 import Appearance from './pages/patient/Patient_Settings/Appearance';
 import LandingPage from './pages/LandingPage/LandingPage';
 import MedicalRecords from "./pages/patient/MedicalRecord";
+import AppointmentsMonitor from "./pages/admin/AppointmentMonitor";
 
 export default function App() {
   return (
