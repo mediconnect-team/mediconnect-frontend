@@ -15,6 +15,7 @@ export default function App() {
           </div>
           <div className="form-check form-switch">
             <input type="checkbox" className="form-check-input" />
+            
           </div>
         </div>
 

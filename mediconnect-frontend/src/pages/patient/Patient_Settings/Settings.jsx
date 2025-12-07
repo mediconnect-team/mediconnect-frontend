@@ -11,7 +11,7 @@ function Settings() {
 
   const handleTabClick = (tab) => {
     setActiveTab(tab);
-    navigate(`/settings/${tab.toLowerCase()}`);
+    navigate(`/patient/settings/${tab.toLowerCase()}`);
   };
 
   const days = [
@@ -20,10 +20,10 @@ function Settings() {
   ];
 
   useEffect(() => {
-  const path = location.pathname.split("/")[2] || "general";
-  const tabName = tabs.find((tab) => tab.toLowerCase() === path);
-  if (tabName) setActiveTab(tabName);
-}, [location.pathname]);
+    const path = location.pathname.split("/")[2] || "general";
+    const tabName = tabs.find((tab) => tab.toLowerCase() === path);
+    if (tabName) setActiveTab(tabName);
+  }, [location.pathname]);
 
 
   return (
@@ -31,28 +31,28 @@ function Settings() {
       <h3>Settings</h3>
       <p>Manage your hospital management system preferences</p>
 
-   
+
       <nav className="settings-navbar sticky-top bg-light mb-3">
-            {tabs.map((tab) => (
-            <button
-                key={tab}
-                className={`settings-tab ${activeTab === tab ? "active" : ""}`}
-                onClick={() => handleTabClick(tab)}
-            >
-                {tab}
-            </button>
-            ))}
+        {tabs.map((tab) => (
+          <button
+            key={tab}
+            className={`settings-tab ${activeTab === tab ? "active" : ""}`}
+            onClick={() => handleTabClick(tab)}
+          >
+            {tab}
+          </button>
+        ))}
       </nav>
 
-  
+
       <div className="settings-content mb-4">
         <Outlet />
       </div>
 
-      
+
       {activeTab === "General" && (
         <>
-      
+
           <div className="hInfo card p-4 mb-4">
             <h5 className="mb-4 d-flex align-items-center">
               <span className="me-2">🏥</span> Hospital Information
@@ -107,7 +107,7 @@ function Settings() {
             </form>
           </div>
 
-        
+
           <div className="operatingHours card p-4 w-100 mb-4">
             <h5 className="mb-4 d-flex align-items-center">
               <span className="me-2">⏰</span> Operating Hours
@@ -116,20 +116,20 @@ function Settings() {
             {days.map((day) => (
               <div className="row align-items-center mb-3 d-flex justify-content-between" key={day}>
                 <div className="col-md-3">
-                    <strong>{day}</strong>
+                  <strong>{day}</strong>
                 </div>
 
                 <div className="col-md-7 d-flex align-items-center justify-content-end">
-                    <input type="time" className="form-control me-2" />
-                    <span className="mx-2">to</span>
-                    <input type="time" className="form-control me-3" defaultValue="18:00" />
+                  <input type="time" className="form-control me-2" />
+                  <span className="mx-2">to</span>
+                  <input type="time" className="form-control me-3" defaultValue="18:00" />
                 </div>
 
-                <div className="col-md-2 d-flex justify-content-end"> 
-                    <label className="switch">
+                <div className="col-md-2 d-flex justify-content-end">
+                  <label className="switch">
                     <input type="checkbox" defaultChecked={day !== "Sunday"} />
                     <span className="slider round"></span>
-                    </label>
+                  </label>
                 </div>
               </div>
             ))}
