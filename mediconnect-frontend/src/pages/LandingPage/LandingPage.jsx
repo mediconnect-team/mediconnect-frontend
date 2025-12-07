@@ -13,7 +13,7 @@ export default function LandingPage() {
         </a>
 
         <div className="ms-auto d-flex gap-3">
-          <a href="#" className="text-dark fw-semibold me-4">About</a>
+          <a href="#about" className="text-dark fw-semibold me-4">About</a>
           <button className="btn btn-outline-dark me-2"><Link to='/login' className="text-decoration-none text-"> Login</Link></button>
           <button className="btn btn-dark">Get Started</button>
         </div>
@@ -72,7 +72,7 @@ export default function LandingPage() {
       </section>
 
       {/* Everything You Need Section */}
-      <section className="py-5">
+      <section className="py-5" id="about">
         <Container>
           <h2 className="text-center fw-bold display-6">Everything You Need in One Platform</h2>
           <p className="text-center text-muted fs-5 mx-auto" style={{ maxWidth: "800px" }}>
