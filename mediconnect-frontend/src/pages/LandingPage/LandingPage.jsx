@@ -1,12 +1,11 @@
 import React from "react";
 import { Container, Row, Col, Button, Card } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import Login from "./Login";
 
 export default function LandingPage() {
   return (
     <div>
-     
+
       <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm py-3 px-4">
         <a className="navbar-brand d-flex align-items-center fw-bold fs-4" href="#">
           <span className="text-primary me-2">❤️</span> MedCare HMS
@@ -19,7 +18,7 @@ export default function LandingPage() {
         </div>
       </nav>
 
-     
+
       <section
         className="text-center py-5"
         style={{ backgroundColor: "#f0f5ff", minHeight: "80vh" }}
@@ -44,7 +43,10 @@ export default function LandingPage() {
 
           <div className="mt-4">
             <Button variant="dark" size="lg" className="me-3">
-              Register as Patient
+              <Link
+                to="/register"
+                className="text-decoration-none text-white"
+              >Register as Patient</Link> 
             </Button>
             <Button variant="outline-dark" size="lg">
               Learn More
