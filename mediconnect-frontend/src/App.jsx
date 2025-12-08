@@ -13,6 +13,8 @@ import System from './pages/patient/Patient_Settings/System';
 import Appearance from './pages/patient/Patient_Settings/Appearance';
 import LandingPage from './pages/LandingPage/LandingPage';
 import MedicalRecords from "./pages/patient/MedicalRecord";
+import AppointmentsMonitor from "./pages/admin/AppointmentMonitor";
+import ManageDoctor from "./pages/admin/ManageDoctor";
 
 export default function App() {
   return (
@@ -22,7 +24,7 @@ export default function App() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-
+    
       {/* Patient Protected Routes */}
       <Route path="/patient" element={<PatientRoute />}>
 
