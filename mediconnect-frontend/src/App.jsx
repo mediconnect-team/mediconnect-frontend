@@ -22,6 +22,7 @@ import AdminStaffRegistration from "./pages/admin/AdminStaffRegistration";
 import StaffDirectory from "./pages/admin/AdminStaffDirectory";
 import AppointmentsMonitor from "./pages/admin/AppointmentMonitor";
 import DoctorManagement from "./pages/admin/ManageDoctor";
+import DoctorSchedule from './pages/doctor/Doctor_Schedule';
 
 export default function App() {
   return (
@@ -46,11 +47,11 @@ export default function App() {
 
         {/* Patient Settings */}
         <Route path="settings" element={<Settings />}>
-          <Route index element={<div />} />
-          <Route path="general" element={<div />} />
+          {/* <Route index element={<div />} /> */}
+          {/* <Route path="general" element={<div />} /> */}
           <Route path="notification" element={<Notification />} />
-          <Route path="security" element={<Security />} />
-          <Route path="system" element={<System />} />
+          {/* <Route path="security" element={<Security />} /> */}
+          {/* <Route path="system" element={<System />} /> */}
           <Route path="appearance" element={<Appearance />} />
         </Route>
 
@@ -59,8 +60,10 @@ export default function App() {
       {/* Doctor Protected Routes */}
       <Route path="/doctor" element={<DoctorRoute />}>
         <Route path="dashboard" element={<DoctorDashboard />} />
-        {/* <Route path="reports" element={<DoctorReports />} />
+
         <Route path="schedule" element={<DoctorSchedule />} />
+        {/* <Route path="reports" element={<DoctorReports />} />
+        
         <Route path="appointments" element={<DoctorAppointments />} /> */}
         <Route path="settings" element={<Settings />}>
           <Route index element={<div />} />
