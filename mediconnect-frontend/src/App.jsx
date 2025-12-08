@@ -21,6 +21,7 @@ import AdminDashboard from './components/admin/AdminDashboard';
 import AdminStaffRegistration from "./pages/admin/AdminStaffRegistration";
 import StaffDirectory from "./pages/admin/AdminStaffDirectory";
 import AppointmentsMonitor from "./pages/admin/AppointmentMonitor";
+import DoctorManagement from "./pages/admin/ManageDoctor";
 
 export default function App() {
   return (
@@ -79,6 +80,7 @@ export default function App() {
           <Route path="directory" element={<StaffDirectory />} />
         </Route>
         <Route path="appointments" element={<AppointmentsMonitor />} />
+        <Route path="doctors" element={<DoctorManagement />} />
 
         {/* <Route path="staff" element={<StaffRegistration />} />
         <Route path="patients" element={<ManagePatients />} />
