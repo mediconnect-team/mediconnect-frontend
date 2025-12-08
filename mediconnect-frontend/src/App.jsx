@@ -20,6 +20,7 @@ import AdminRoute from './routing/AdminRoute';
 import AdminDashboard from './components/admin/AdminDashboard';
 import AdminStaffRegistration from "./pages/admin/AdminStaffRegistration";
 import StaffDirectory from "./pages/admin/AdminStaffDirectory";
+import AppointmentsMonitor from "./pages/admin/AppointmentMonitor";
 
 export default function App() {
   return (
@@ -29,7 +30,7 @@ export default function App() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-    
+
       {/* Patient Protected Routes */}
       <Route path="/patient" element={<PatientRoute />}>
 
@@ -76,8 +77,8 @@ export default function App() {
         <Route path="staff">
           <Route path="registration" element={<AdminStaffRegistration />} />
           <Route path="directory" element={<StaffDirectory />} />
-
         </Route>
+        <Route path="appointments" element={<AppointmentsMonitor />} />
 
         {/* <Route path="staff" element={<StaffRegistration />} />
         <Route path="patients" element={<ManagePatients />} />
