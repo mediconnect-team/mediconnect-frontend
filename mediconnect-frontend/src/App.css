@@ -26,3 +26,24 @@
     background: #f3f3f3;
     border-radius: 10px;
 }
+
+.admin-dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.admin-stat-card {
+    border-radius: 14px;
+    background: #fff;
+    border: none;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.text-purple {
+    color: #8b5cf6;
+}
+
+.list-group-item {
+    border: none;
+    border-bottom: 1px solid #eee;
+}

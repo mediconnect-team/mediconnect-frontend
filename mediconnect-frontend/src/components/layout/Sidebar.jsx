@@ -19,25 +19,34 @@ export default function Sidebar({ collapsed, toggleCollapse }) {
         PATIENT: [
             { to: "/patient/dashboard", label: "Dashboard", icon: "bi-speedometer2" },
             { to: "/patient/appointments", label: "My Appointments", icon: "bi-calendar-event" },
-            { to: "/patient/payments", label: "Payments", icon: "bi-wallet2" },
+            // { to: "/patient/payments", label: "Payments", icon: "bi-wallet2" },
             { to: "/patient/records", label: "Medical Records", icon: "bi-file-earmark-medical" },
             { to: "/patient/emergency", label: "Emergency Contacts", icon: "bi-telephone" },
             { to: "/patient/settings", label: "Settings", icon: "bi-gear" },
         ],
 
         DOCTOR: [
-            { to: "/doctor/dashboard", label: "Dashboard", icon: "bi-heart-pulse" },
-            { to: "/doctor/patients", label: "My Patients", icon: "bi-people" },
-            { to: "/doctor/appointments", label: "Appointments", icon: "bi-calendar3" },
-            { to: "/doctor/reports", label: "Reports", icon: "bi-file-earmark-medical" },
+            { to: "/doctor/dashboard", label: "Dashboard", icon: "bi-speedometer2" },
+            { to: "/doctor/reports", label: "Patient Reports", icon: "bi-file-medical" },
+            { to: "/doctor/schedule", label: "Doctor Schedule", icon: "bi-calendar-week" },
+            { to: "/doctor/appointments", label: "Appointments & Prescriptions", icon: "bi-capsule" },
+            { to: "/doctor/settings", label: "Settings", icon: "bi-gear" },
         ],
+
 
         ADMIN: [
             { to: "/admin/dashboard", label: "Dashboard", icon: "bi-speedometer" },
-            { to: "/admin/users", label: "Manage Users", icon: "bi-person-gear" },
+            { to: "/admin/staff/registration", label: "Staff Registration", icon: "bi-person-plus" },
+            { to: "/admin/staff/directory", label: "Staff Directory", icon: "bi-people" },
+
+            { to: "/admin/patients", label: "Patients", icon: "bi-people-fill" },
             { to: "/admin/doctors", label: "Doctors", icon: "bi-person-badge" },
-            { to: "/admin/settings", label: "System Settings", icon: "bi-gear" },
+            { to: "/admin/nurses", label: "Nurses", icon: "bi-heart-pulse" },
+            { to: "/admin/appointments", label: "All Appointments", icon: "bi-calendar-event" },
+            { to: "/admin/records", label: "Medical Records", icon: "bi-file-earmark-medical" },
+            { to: "/admin/settings", label: "Settings", icon: "bi-gear" },
         ],
+
     };
 
     const activeMenu = menus[user.role];
@@ -49,7 +58,7 @@ export default function Sidebar({ collapsed, toggleCollapse }) {
         <div
             className="d-flex flex-column shadow-sm"
             style={{
-                width: collapsed ? "75px" : "260px",
+                width: collapsed ? "70px" : "230px",
                 minHeight: "100vh",
                 background: "var(--sidebar-bg)",
                 borderRight: "1px solid #e5e5e5",

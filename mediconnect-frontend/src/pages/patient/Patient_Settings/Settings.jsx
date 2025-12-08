@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from "react";
 import "./settings.css";
 import { useNavigate, useLocation, Outlet } from "react-router-dom";
+import useAuth from "../../../hooks/useAuth";
 
 function Settings() {
+  const { user } = useAuth();
+
   const [activeTab, setActiveTab] = useState("General");
   const navigate = useNavigate();
   const location = useLocation();
@@ -11,7 +14,14 @@ function Settings() {
 
   const handleTabClick = (tab) => {
     setActiveTab(tab);
-    navigate(`/patient/settings/${tab.toLowerCase()}`);
+
+    const roleBase = {
+      PATIENT: "/patient/settings",
+      DOCTOR: "/doctor/settings",
+      ADMIN: "/admin/settings",
+    };
+
+    navigate(`${roleBase[user.role]}/${tab.toLowerCase()}`);
   };
 
   const days = [
