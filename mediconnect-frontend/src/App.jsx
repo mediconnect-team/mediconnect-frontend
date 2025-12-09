@@ -25,6 +25,7 @@ import DoctorManagement from "./pages/admin/ManageDoctor";
 import DoctorSchedule from './pages/doctor/Doctor_Schedule';
 import NurseManagement from "./pages/admin/AdminNurses";
 
+
 export default function App() {
   return (
     <Routes>
