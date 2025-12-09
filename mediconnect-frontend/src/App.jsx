@@ -23,7 +23,8 @@ import StaffDirectory from "./pages/admin/AdminStaffDirectory";
 import AppointmentsMonitor from "./pages/admin/AppointmentMonitor";
 import DoctorManagement from "./pages/admin/ManageDoctor";
 import DoctorSchedule from './pages/doctor/Doctor_Schedule';
-import PatientManagement from "./pages/admin/PatientManagement";
+import NurseManagement from "./pages/admin/AdminNurses";
+
 
 export default function App() {
   return (
@@ -85,7 +86,8 @@ export default function App() {
         </Route>
         <Route path="appointments" element={<AppointmentsMonitor />} />
         <Route path="doctors" element={<DoctorManagement />} />
-          <Route path="patients" element={<PatientManagement />} />
+        <Route path="nurses" element={<NurseManagement />} />
+
         {/* <Route path="staff" element={<StaffRegistration />} />
         <Route path="patients" element={<ManagePatients />} />
         <Route path="doctors" element={<ManageDoctors />} /> */}
