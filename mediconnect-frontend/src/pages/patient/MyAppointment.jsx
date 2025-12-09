@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Calendar, CheckCircle, Stethoscope, Plus } from 'lucide-react';
 import './MyAppointment.css';
-import { useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 
 const MyAppointment = () => {
   const [activeTab, setActiveTab] = useState('upcoming');
@@ -16,11 +16,11 @@ const MyAppointment = () => {
           <p className="appointments-subtitle">Schedule and manage your appointments with doctors</p>
         </div>
         <button
-            className="book-appointment-btn"
-            onClick={() => navigate("/patient/book-appointment1")}
-            >
-            <Plus size={20} />
-            Book Appointment
+          className="book-appointment-btn"
+          onClick={() => navigate("/patient/appointments/1")}
+        >
+          <Plus size={20} />
+          Book Appointment
         </button>
       </div>
 
@@ -51,19 +51,19 @@ const MyAppointment = () => {
       </div>
 
       <div className="tabs-container">
-        <button 
+        <button
           className={`tab ${activeTab === 'upcoming' ? 'tab-active' : ''}`}
           onClick={() => setActiveTab('upcoming')}
         >
           Upcoming Appointments
         </button>
-        <button 
+        <button
           className={`tab ${activeTab === 'past' ? 'tab-active' : ''}`}
           onClick={() => setActiveTab('past')}
         >
           Past Appointments
         </button>
-        <button 
+        <button
           className={`tab ${activeTab === 'doctors' ? 'tab-active' : ''}`}
           onClick={() => setActiveTab('doctors')}
         >
@@ -76,12 +76,13 @@ const MyAppointment = () => {
           <Calendar className="empty-icon" size={64} strokeWidth={1.5} />
           <h2 className="empty-title">No upcoming appointments</h2>
           <p className="empty-subtitle">You don't have any scheduled appointments.</p>
-          <button className="book-appointment-btn-secondary" onClick={() => navigate("/patient/book-appointment1")}>
+          <button className="book-appointment-btn-secondary" onClick={() => navigate("/patient/appointments/1")}>
             <Plus size={20} />
             Book Appointment
           </button>
         </div>
       </div>
+      <Outlet />
     </div>
   );
 };

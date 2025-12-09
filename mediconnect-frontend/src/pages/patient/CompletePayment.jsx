@@ -1,7 +1,9 @@
 import React from "react";
 import { ArrowLeft } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
 
 const CompletePayment = () => {
+  const navigate = useNavigate();
   return (
     <div className="payment-wrapper">
       <style>{`
@@ -151,7 +153,7 @@ const CompletePayment = () => {
         }
       `}</style>
 
-      <div className="back">
+      <div className="back" onClick={() => navigate("/patient/appointments")} >
         <ArrowLeft size={18} /> Back
       </div>
 

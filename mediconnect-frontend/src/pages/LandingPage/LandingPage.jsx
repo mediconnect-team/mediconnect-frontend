@@ -14,10 +14,8 @@ export default function LandingPage() {
         <div className="ms-auto d-flex gap-3">
           <a href="#about" className="text-dark fw-bold me-4 text-decoration-none outline-dark align-self-center">About</a>
           {/* <button className="btn btn-outline-dark me-2"><Link to='/login' className="text-decoration-none link-light"> Login</Link></button> */}
-          {/* <button className="btn btn-dark"><Link to='/login' className="text-decoration-none text-white"> Login</Link></button> */}
-          <Button variant="outline-dark" size="lg">
-            Login 
-          </Button>
+          <button className="btn btn-dark"><Link to='/login' className="text-decoration-none text-white"> Login</Link></button>
+          
           <button className="btn btn-dark "><Link className="text-decoration-none text-white" to='/register'> Get Started</Link></button>
         </div>
       </nav>

@@ -31,7 +31,7 @@ const BookAppointmentStep3 = () => {
             <h2 style={styles.title}>Book Appointment - Step 3 of 4</h2>
             <p style={styles.subtitle}>Pick an available time slot</p>
           </div>
-          <button style={styles.closeButton} onClick={() => console.log('Close')}>
+          <button style={styles.closeButton} onClick={() => navigate("/patient/appointments")}>
             <X size={24} />
           </button>
         </div>
@@ -86,14 +86,18 @@ const BookAppointmentStep3 = () => {
 
         {/* Footer Buttons */}
         <div style={styles.footer}>
-          <button style={styles.previousButton}>
+          <button style={styles.previousButton}
+            onClick={() => navigate("/patient/appointments/2")}
+          >
             <ArrowLeft size={20} />
             Previous
           </button>
           <div style={styles.footerRight}>
-            <button style={styles.cancelButton}>Cancel</button>
-            <button 
-            onClick={() => navigate("/patient/book-appointment4")}
+            <button style={styles.cancelButton}
+              onClick={() => navigate("/patient/appointments")}
+            >Cancel</button>
+            <button
+              onClick={() => navigate("/patient/appointments/4")}
               style={{
                 ...styles.nextButton,
                 ...(!selectedTime ? styles.nextButtonDisabled : {})

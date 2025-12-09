@@ -25,6 +25,12 @@ import DoctorManagement from "./pages/admin/ManageDoctor";
 import DoctorSchedule from './pages/doctor/Doctor_Schedule';
 import NurseManagement from "./pages/admin/AdminNurses";
 import PatientManagement from "./pages/admin/PatientManagement";
+import MyAppointment from "./pages/patient/MyAppointment";
+import BookAppointmentStep1 from "./pages/patient/BookAppointmentStep1";
+import BookAppointmentStep2 from './pages/patient/BookAppointmentStep2';
+import CompletePayment from './pages/patient/CompletePayment';
+import BookAppointmentStep3 from './pages/patient/BookAppointmentStep3';
+import BookAppointmentStep4 from './pages/patient/BookAppointmentStep4';
 
 
 export default function App() {
@@ -45,16 +51,27 @@ export default function App() {
         {/* Patient Medical Records */}
         <Route path="records" element={<MedicalRecords />} />
 
+        {/* Patient Appointments */}
+        <Route path="appointments" element={<MyAppointment />}>
+          <Route path="1" element={<BookAppointmentStep1 />} />
+          <Route path="2" element={<BookAppointmentStep2 />} />
+          <Route path="3" element={<BookAppointmentStep3 />} />
+          <Route path="4" element={<BookAppointmentStep4 />} />
+          {/* <Route path="payments" element={<CompletePayment />} /> */}
+        </Route>
+        <Route path="payments" element={<CompletePayment />} />
+
+
         {/* Patient Medical Emergency Contact */}
         <Route path="emergency" element={<EmergencyContacts />} />
 
         {/* Patient Settings */}
         <Route path="settings" element={<Settings />}>
-          {/* <Route index element={<div />} /> */}
-          {/* <Route path="general" element={<div />} /> */}
+          <Route index element={<div />} />
+          <Route path="general" element={<div />} />
           <Route path="notification" element={<Notification />} />
-          {/* <Route path="security" element={<Security />} /> */}
-          {/* <Route path="system" element={<System />} /> */}
+          <Route path="security" element={<Security />} />
+          <Route path="system" element={<System />} />
           <Route path="appearance" element={<Appearance />} />
         </Route>
 
@@ -65,8 +82,10 @@ export default function App() {
         <Route path="dashboard" element={<DoctorDashboard />} />
 
         <Route path="schedule" element={<DoctorSchedule />} />
+
+
+
         {/* <Route path="reports" element={<DoctorReports />} />
-        
         <Route path="appointments" element={<DoctorAppointments />} /> */}
         <Route path="settings" element={<Settings />}>
           <Route index element={<div />} />

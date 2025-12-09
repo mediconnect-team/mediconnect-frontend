@@ -39,7 +39,7 @@ const BookAppointmentStep2 = () => {
     const startingDayOfWeek = firstDay.getDay();
 
     const days = [];
-    
+
     const prevMonthLastDay = new Date(year, month, 0).getDate();
     for (let i = startingDayOfWeek - 1; i >= 0; i--) {
       days.push({
@@ -94,7 +94,7 @@ const BookAppointmentStep2 = () => {
             <h2 style={styles.title}>Book Appointment - Step 2 of 4</h2>
             <p style={styles.subtitle}>Choose a date for your appointment</p>
           </div>
-          <button style={styles.closeButton} onClick={() => console.log('Close')}>
+          <button style={styles.closeButton} onClick={() => navigate("/patient/appointments")}>
             <X size={24} />
           </button>
         </div>
@@ -163,13 +163,17 @@ const BookAppointmentStep2 = () => {
 
         {/* Footer Buttons */}
         <div style={styles.footer}>
-          <button style={styles.previousButton}>
+          <button style={styles.previousButton}
+            onClick={() => navigate("/patient/appointments/1")}
+          >
             <ArrowLeft size={20} />
             Previous
           </button>
-          <button style={styles.cancelButton}>Cancel</button>
+          <button style={styles.cancelButton}
+            onClick={() => navigate("/patient/appointments")}
+          >Cancel</button>
           <button style={styles.nextButton}
-          onClick={() => navigate("/patient/book-appointment3")}
+            onClick={() => navigate("/patient/appointments/3")}
           >
             Next
             <ArrowRight size={20} />

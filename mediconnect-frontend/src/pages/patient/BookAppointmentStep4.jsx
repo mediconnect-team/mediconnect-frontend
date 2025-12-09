@@ -25,7 +25,7 @@ const BookAppointmentStep4 = () => {
             <h2 style={styles.title}>Book Appointment - Step 4 of 4</h2>
             <p style={styles.subtitle}>Review and confirm your appointment</p>
           </div>
-          <button style={styles.closeButton} onClick={() => console.log('Close')}>
+          <button style={styles.closeButton} onClick={() => navigate("/patient/appointments")}>
             <X size={24} />
           </button>
         </div>
@@ -59,7 +59,7 @@ const BookAppointmentStep4 = () => {
                 <p style={styles.doctorDepartment}>Dermatology</p>
               </div>
             </div>
-            
+
             <div style={styles.detailsSection}>
               <div style={styles.detailItem}>
                 <Calendar size={20} color="#6b7280" />
@@ -114,15 +114,19 @@ const BookAppointmentStep4 = () => {
 
         {/* Footer Buttons */}
         <div style={styles.footer}>
-          <button style={styles.previousButton}>
+          <button style={styles.previousButton}
+            onClick={() => navigate("/patient/appointments/3")}
+          >
             <ArrowLeft size={20} />
             Previous
           </button>
           <div style={styles.footerRight}>
-            <button style={styles.cancelButton}>Cancel</button>
+            <button style={styles.cancelButton}
+              onClick={() => navigate("/patient/appointments")}
+            >Cancel</button>
             <button
-            onClick={() => navigate("/patient/complete-payment")}
-            style={styles.confirmButton}>
+              onClick={() => navigate("/patient/payments")}
+              style={styles.confirmButton}>
               <Check size={20} />
               Confirm Booking
             </button>

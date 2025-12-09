@@ -39,7 +39,7 @@ const BookAppointmentStep1 = () => {
     const startingDayOfWeek = firstDay.getDay();
 
     const days = [];
-    
+
     const prevMonthLastDay = new Date(year, month, 0).getDate();
     for (let i = startingDayOfWeek - 1; i >= 0; i--) {
       days.push({
@@ -93,7 +93,7 @@ const BookAppointmentStep1 = () => {
           <div>
             <h2 style={styles.title}>Book Appointment - Step {step} of 4</h2>
           </div>
-          <button style={styles.closeButton} onClick={() => console.log('Close')}>
+          <button style={styles.closeButton} onClick={() => navigate("/patient/appointments")}>
             <X size={24} />
           </button>
         </div>
@@ -151,7 +151,7 @@ const BookAppointmentStep1 = () => {
                         <span style={styles.star}>⭐</span> {doctor.rating}
                       </span>
                       <span style={styles.experience}>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2" style={{marginRight: '4px'}}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2" style={{ marginRight: '4px' }}>
                           <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
                           <line x1="16" y1="2" x2="16" y2="6" />
                           <line x1="8" y1="2" x2="8" y2="6" />
@@ -235,10 +235,12 @@ const BookAppointmentStep1 = () => {
           )}
           {step === 1 && <div></div>}
           <div style={styles.footerRight}>
-            <button style={styles.cancelButton}>Cancel</button>
-            <button 
-            onClick={() => navigate("/patient/book-appointment2")}
-            style={styles.nextButton}
+            <button style={styles.cancelButton}
+              onClick={() => navigate("/patient/appointments")}
+            >Cancel</button>
+            <button
+              onClick={() => navigate("/patient/appointments/2")}
+              style={styles.nextButton}
             >
               Next
               <ArrowRight size={20} />
