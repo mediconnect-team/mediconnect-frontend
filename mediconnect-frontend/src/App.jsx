@@ -24,6 +24,7 @@ import AppointmentsMonitor from "./pages/admin/AppointmentMonitor";
 import DoctorManagement from "./pages/admin/ManageDoctor";
 import DoctorSchedule from './pages/doctor/Doctor_Schedule';
 import NurseManagement from "./pages/admin/AdminNurses";
+import PatientManagement from "./pages/admin/PatientManagement";
 
 
 export default function App() {
@@ -87,9 +88,10 @@ export default function App() {
         <Route path="appointments" element={<AppointmentsMonitor />} />
         <Route path="doctors" element={<DoctorManagement />} />
         <Route path="nurses" element={<NurseManagement />} />
+        <Route path="patients" element={<PatientManagement />} />
 
         {/* <Route path="staff" element={<StaffRegistration />} />
-        <Route path="patients" element={<ManagePatients />} />
+        
         <Route path="doctors" element={<ManageDoctors />} /> */}
 
         <Route path="settings" element={<Settings />}>
