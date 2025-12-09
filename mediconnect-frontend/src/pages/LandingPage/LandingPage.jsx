@@ -13,7 +13,11 @@ export default function LandingPage() {
 
         <div className="ms-auto d-flex gap-3">
           <a href="#about" className="text-dark fw-bold me-4 text-decoration-none outline-dark align-self-center">About</a>
-          <button className="btn btn-outline-dark me-2"><Link to='/login' className="text-decoration-none text-dark"> Login</Link></button>
+          {/* <button className="btn btn-outline-dark me-2"><Link to='/login' className="text-decoration-none link-light"> Login</Link></button> */}
+          {/* <button className="btn btn-dark"><Link to='/login' className="text-decoration-none text-white"> Login</Link></button> */}
+          <Button variant="outline-dark" size="lg">
+            Login 
+          </Button>
           <button className="btn btn-dark "><Link className="text-decoration-none text-white" to='/register'> Get Started</Link></button>
         </div>
       </nav>
@@ -46,7 +50,7 @@ export default function LandingPage() {
               <Link
                 to="/register"
                 className="text-decoration-none text-white"
-              >Register as Patient</Link> 
+              >Register as Patient</Link>
             </Button>
             <Button variant="outline-dark" size="lg">
               Learn More
@@ -181,20 +185,21 @@ export default function LandingPage() {
           <Button variant="outline-light" size="lg">
             Learn More
           </Button> */}
-          <Button  size="lg" className="me-3">
-    
-    <Link to="/register" style={{  textDecoration: 'none' }} className="border rounded bg-light text-dark p-2">
-      Register as Patient
-    </Link>
-  </Button>
+          <Button size="lg" className="me-3">
 
-  
-  <Button  size="lg">
-    
-    <Link to="/learn-more" style={{  textDecoration: 'none' }} className="border rounded text-white p-2 outline-white ">
-      Learn More
-    </Link>
-  </Button>
+            <Link to="/register" style={{ textDecoration: 'none' }} className="border rounded bg-light text-dark p-2">
+              Register as Patient
+            </Link>
+          </Button>
+          {/* <button className="btn btn-dark"><Link to='/login' className="text-decoration-none text-white"> Register As Patient</Link></button> */}
+
+
+          <Button size="lg">
+
+            <Link to="/learn-more" style={{ textDecoration: 'none' }} className="border rounded text-white p-2 outline-white ">
+              Learn More
+            </Link>
+          </Button>
         </Container>
       </section>
 
