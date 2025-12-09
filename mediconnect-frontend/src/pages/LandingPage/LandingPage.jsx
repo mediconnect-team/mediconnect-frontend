@@ -1,6 +1,6 @@
 import React from "react";
 import { Container, Row, Col, Button, Card } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, Links } from "react-router-dom";
 
 export default function LandingPage() {
   return (
@@ -12,9 +12,9 @@ export default function LandingPage() {
         </a>
 
         <div className="ms-auto d-flex gap-3">
-          <a href="#about" className="text-dark fw-semibold me-4">About</a>
-          <button className="btn btn-outline-dark me-2"><Link to='/login' className="text-decoration-none text-"> Login</Link></button>
-          <button className="btn btn-dark">Get Started</button>
+          <a href="#about" className="text-dark fw-bold me-4 text-decoration-none outline-dark align-self-center">About</a>
+          <button className="btn btn-outline-dark me-2"><Link to='/login' className="text-decoration-none text-dark"> Login</Link></button>
+          <button className="btn btn-dark "><Link className="text-decoration-none text-white" to='/register'> Get Started</Link></button>
         </div>
       </nav>
 
@@ -172,15 +172,29 @@ export default function LandingPage() {
       <section className="text-center py-5" style={{ backgroundColor: "#0d6efd", color: "white" }}>
         <Container>
           <h2 className="fw-bold display-5">Ready to Transform Your Healthcare Operations?</h2>
-          <p className="fs-5 mt-3">
+          <p className="fs-5 mt-3 text-white">
             Join thousands of healthcare providers who trust MedCare HMS.
           </p>
-          <Button variant="light" size="lg" className="me-3">
-            Register as Patient
+          {/* <Button variant="light" size="lg" className="me-3">
+          <Link to="/register">Register as Patient</Link>
           </Button>
           <Button variant="outline-light" size="lg">
             Learn More
-          </Button>
+          </Button> */}
+          <Button  size="lg" className="me-3">
+    
+    <Link to="/register" style={{  textDecoration: 'none' }} className="border rounded bg-light text-dark p-2">
+      Register as Patient
+    </Link>
+  </Button>
+
+  
+  <Button  size="lg">
+    
+    <Link to="/learn-more" style={{  textDecoration: 'none' }} className="border rounded text-white p-2 outline-white ">
+      Learn More
+    </Link>
+  </Button>
         </Container>
       </section>
 
