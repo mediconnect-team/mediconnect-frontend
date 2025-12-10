@@ -31,6 +31,7 @@ import BookAppointmentStep2 from './pages/patient/BookAppointmentStep2';
 import CompletePayment from './pages/patient/CompletePayment';
 import BookAppointmentStep3 from './pages/patient/BookAppointmentStep3';
 import BookAppointmentStep4 from './pages/patient/BookAppointmentStep4';
+import PatientRecords1 from './pages/admin/PatientRecords';
 
 
 export default function App() {
@@ -108,9 +109,10 @@ export default function App() {
         <Route path="doctors" element={<DoctorManagement />} />
         <Route path="nurses" element={<NurseManagement />} />
         <Route path="patients" element={<PatientManagement />} />
+        <Route path="records" element={<PatientRecords1 />} />
+
 
         {/* <Route path="staff" element={<StaffRegistration />} />
-        
         <Route path="doctors" element={<ManageDoctors />} /> */}
 
         <Route path="settings" element={<Settings />}>

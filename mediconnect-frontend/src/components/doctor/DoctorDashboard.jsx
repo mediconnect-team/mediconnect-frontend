@@ -59,7 +59,6 @@ export default function DoctorDashboard() {
 
             </Row>
 
-            {/* Main Two Columns */}
             <Row className="gy-2 mb-3">
 
                 {/* Today's Appointments */}
@@ -80,11 +79,11 @@ export default function DoctorDashboard() {
                                     </div>
 
                                     <span
-                                        className={`badge ${item.status === "current"
-                                                ? "bg-dark"
-                                                : item.status === "completed"
-                                                    ? "bg-success"
-                                                    : "bg-warning text-dark"
+                                        className={`badge rounded-3 ${item.status === "current"
+                                            ? "bg-dark"
+                                            : item.status === "completed"
+                                                ? "bg-success"
+                                                : "bg-warning text-dark"
                                             }`}
                                     >
                                         {item.status}
@@ -113,9 +112,9 @@ export default function DoctorDashboard() {
                                     </div>
 
                                     <span
-                                        className={`badge ${item.badge === "urgent"
-                                                ? "bg-danger"
-                                                : "bg-success"
+                                        className={`badge rounded-3 ${item.badge === "urgent"
+                                            ? "bg-danger"
+                                            : "bg-success"
                                             }`}
                                     >
                                         {item.badge}
