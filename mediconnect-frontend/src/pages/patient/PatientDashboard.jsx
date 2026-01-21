@@ -3,10 +3,57 @@ import StatCard from "../../components/patient/StatCard";
 import AppointmentCard from "../../components/patient/AppointmentCard";
 import ReportCard from "../../components/patient/ReportCard";
 import QuickActionCard from './../../components/patient/QuickAction';
-
-
+import { getAllDoctors, getUpcomingAppointments , getActivePrescriptions,NumberOfCompletedAppointments,TotalNumberOfDoctorsConsulted,getDoctorsByBranch,getRecentReports,getMedicalRecords } from "../../services/patientApi";
+import { useState,useEffect  } from "react";
 
 export default function PatientDashboard() {
+    const [UpcomingAppointments, setUpcomingAppointments] = useState([]);
+    const [MedicalRecords, setMedicalRecords] = useState([]);
+    const [ActivePrescriptions, setActivePrescriptions] = useState(0);
+    const [RecentReports, setRecentReports] = useState([]);
+    
+
+    const fetchUpcomingAppointments = async () => {
+        // Fetch upcoming appointments from API
+        const data = await getUpcomingAppointments();
+        if (data) {
+            setUpcomingAppointments(data);
+        }
+    }
+
+    const fetchRecentReports = async () => {    
+        // Fetch recent reports from API
+        const data = await getRecentReports();  
+        if (data) {
+            setRecentReports(data);
+        }   
+    }
+    const fetchMedicalRecords = async () => {    
+        // Fetch medical records from API
+        const data = await getMedicalRecords();
+        if (data) {
+            setMedicalRecords(data);
+        }
+    }
+    
+    const fetchDashboardData = async () => {
+       
+        const activePrescriptions = await getActivePrescriptions();
+       
+
+        if (activePrescriptions) {
+            setActivePrescriptions(activePrescriptions);
+        }
+    }
+
+    useEffect(() => {
+        fetchDashboardData();
+        fetchUpcomingAppointments();
+        fetchRecentReports();
+        
+        fetchMedicalRecords();
+    }, []);
+
     return (
         <div className="container-fluid">
 

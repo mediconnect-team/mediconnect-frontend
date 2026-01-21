@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Container,
     Row,
@@ -13,10 +13,57 @@ import {
     FaSearch,
     FaCalendarAlt,
     FaUserMd,
-} from "react-icons/fa";
+} from "react-icons/fa"; 
 
 export default function MedicalRecords() {
     const [selectedRecord, setSelectedRecord] = useState(null);
+
+    // Pagination Logic
+    const [currentPage,setCurrentPage] = useState(1);
+    const recordsPerPage = 2;
+    
+
+    const [medicalRecords, setMedicalRecords] = useState([]);
+    const [lastVisitDate, setLastVisitDate] = useState(null);
+    const [labReportsCount, setLabReportsCount] = useState(0);
+    const [activePrescriptionsCount, setActivePrescriptionsCount] = useState(0);
+
+    const fetchLabReportsCount = async () => {
+        // Fetch lab reports count from API
+        const data = await fetchLabReportsCount();
+        if(data){
+            setLabReportsCount(data);
+        }
+    }
+
+    const fetchActivePrescriptionCount = async ()=> {
+        const data = await fetchActivePrescriptionCount();
+        if(data){
+            setActivePrescriptionsCount(data);
+        }
+    }
+
+    const fetchLastVisitDate = async () => {
+        // Fetch last visit date from API
+        const data = await fetchLastVisitDate();
+        if (data) {
+            setLastVisitDate(data);
+        }   
+    }
+    const fetchMedicalRecords = async () => {
+        // Fetch medical records from API
+        const data = await fetchMedicalRecords();   
+        if (data) {
+            setMedicalRecords(data);
+        }   
+    }
+
+    useEffect(() => {
+        fetchMedicalRecords();
+        fetchLastVisitDate();
+        fetchLabReportsCount();
+        fetchActivePrescriptionCount();
+    }, []);
 
     const records = [
         {
@@ -69,8 +116,36 @@ export default function MedicalRecords() {
             followup: "Monitor BP every week",
             icon: "💊",
         },
+        {
+            title: "Lab Test Results",
+            date: "10/01/2024",
+            doctor: "Dr. Adams",
+            type: "lab",
+            status: "completed",
+            desc: "Blood test and cholesterol report",
+            diagnosis: "Mild cholesterol elevation",
+            treatment: "Diet changes",
+            vitals: {
+                bp: "130/85",
+                hr: "76",
+                temp: "98.4°F",
+                weight: "178 lbs",
+            },
+            medication: {
+                name: "No medication",
+                dose: "-",
+                note: "-",
+            },
+            notes: "LDL slightly high.",
+            followup: "Repeat test in 6 months",
+            icon: "🧪",
+        },
     ];
 
+    const totalPages = Math.ceil(records.length/recordsPerPage);
+    const lastIndex = currentPage * recordsPerPage;
+    const firstIndex = lastIndex -recordsPerPage;
+    const currentRecords = records.slice(firstIndex,lastIndex);
     return (
         <Container fluid className="p-4">
             <h3>Medical Records</h3>
@@ -133,7 +208,7 @@ export default function MedicalRecords() {
             <Row>
                 {/* LEFT LIST */}
                 <Col md={8}>
-                    {records.map((r, index) => (
+                    {currentRecords.map((r, index) => (
                         <Card
                             key={index}
                             className="p-3 mb-3 shadow-sm border-0"
@@ -162,6 +237,35 @@ export default function MedicalRecords() {
                             </Row>
                         </Card>
                     ))}
+
+                    <div className = 'd-flex justify-content-center align-items-center mt-4'>
+                       <Button 
+                       variant="outline-secondary"
+                       className="me-2"
+                       disabled={currentPage==1}
+                       onClick={()=> setCurrentPage(p=> p-1)}
+                       >
+                        Prev
+                       </Button>
+                       {[...Array(totalPages)].map((_,idx)=>{
+                        <Button 
+                        key={idx}
+                        className="me-2"
+                        variant={currentPage===idx+1 ? 'dark' :'outline-dark'}
+                        onClick={()=>setCurrentPage(idx+1)}
+                        >
+                            {idx+1}
+                        </Button>
+
+                       })}
+
+                       <Button 
+                          variant="outline-secondary"
+                            disabled={currentPage==totalPages}
+                            onClick={()=> setCurrentPage(p=> p+1)}
+                    >Next</Button>
+
+                    </div>
                 </Col>
 
                 {/* RIGHT DETAILS */}

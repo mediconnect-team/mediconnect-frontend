@@ -1,10 +1,42 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Calendar, CheckCircle, Stethoscope, Plus } from 'lucide-react';
 import './MyAppointment.css';
 import { Outlet, useNavigate } from 'react-router-dom';
+import { NumberOfCompletedAppointments, TotalNumberOfDoctorsConsulted, getAllDoctors } from '../../services/patientApi';
 
 const MyAppointment = () => {
   const [activeTab, setActiveTab] = useState('upcoming');
+   const [TotalDoctorsConsulted, setTotalDoctorsConsulted] = useState(0);
+    const [CompletedAppointments, setCompletedAppointments] = useState(0);
+    const [doctors, setDoctors] = useState([]);
+
+    const getDoctors = async ()=>{
+        const data = await getAllDoctors();
+        if(data){
+          console.log("doctors data",data);
+          setDoctors(data);
+        }
+    }
+
+    const fetchAppointmentsData = async () => {
+            const completedAppointments = await NumberOfCompletedAppointments();
+            const totalDoctors = await TotalNumberOfDoctorsConsulted();
+         
+            if (completedAppointments) {
+              console.log("completedAppointments",completedAppointments);
+                setCompletedAppointments(completedAppointments);
+            }   
+            if (totalDoctors) {
+              console.log("totalDoctors",totalDoctors); 
+                setTotalDoctorsConsulted(totalDoctors);
+            }
+    
+        }
+
+      useEffect(() => {
+        fetchAppointmentsData();
+        getDoctors();
+      }, []);
 
   const navigate = useNavigate();
 
