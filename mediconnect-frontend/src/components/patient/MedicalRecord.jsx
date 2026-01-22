@@ -176,7 +176,7 @@ export default function MedicalRecords() {
             </Card>
           )}
 
-          {selectedRecord && (
+         {selectedRecord  && (
             <Card className="p-4 shadow-sm border-0">
               <h4>{selectedRecord.title}</h4>
               <p>{selectedRecord.desc}</p>

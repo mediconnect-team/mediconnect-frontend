@@ -1,8 +1,23 @@
+import { useEffect, useState } from "react";
 import { Card, Button, Badge, Container, Row, Col, Alert } from "react-bootstrap";
 import { FiPhone, FiMail, FiMapPin } from "react-icons/fi";
+import { fetchEmergencyContacts } from "../../services/patientApi";
 
 export default function EmergencyContacts() {
+  const [emergencyContacts, setEmergencyContacts] = useState([]);
+  const fetchContacts = async () => {
+    // Fetch emergency contacts from API
+    const data = await fetchEmergencyContacts();
+    if (data) {
+      setEmergencyContacts(data);
+    } 
+  }
 
+  useEffect(() => {
+    fetchContacts();
+  }, []);
+
+  // Dummy data for demonstration
   const contacts = [
     {
       id: 1,
