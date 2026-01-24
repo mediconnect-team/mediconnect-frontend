@@ -13,17 +13,12 @@ Total number of doctors a patient has consulted
 Total  doctors  information for booking appointments
 Total doctors based on branch. 
 
-
 Medical Records details per prescription maximum 2  | pagination (Important)
 no. of Active Prescription
 Last Visit date
 Number of lab reports 
 
-
-
 Emergency Contacts details
-
-
 
 */
 
