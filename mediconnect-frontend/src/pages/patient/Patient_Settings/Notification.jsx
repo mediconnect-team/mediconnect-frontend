@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-export default function App() {
+export default function Notification() {
   const [settings, setSettings] = useState({
     appointmentReminders: true,
     emergencyAlerts: true,
@@ -18,12 +18,14 @@ export default function App() {
     }));
   };
 
+  // Inline style for black toggle
+  const switchStyle = { accentColor: "black" };
+
   return (
     <div className="py-2 w-100">
 
       <div className="card p-3 mb-4 shadow-sm">
         <h5 className="mb-3">🔔 Notification Preferences</h5>
-
 
         <div className="d-flex justify-content-between align-items-center border-bottom py-3">
           <div>
@@ -38,28 +40,12 @@ export default function App() {
               type="checkbox"
               checked={settings.appointmentReminders}
               onChange={() => handleToggle("appointmentReminders")}
+              style={switchStyle}
             />
           </div>
         </div>
 
-
-        <div className="d-flex justify-content-between align-items-center border-bottom py-3">
-          <div>
-            <div className="fw-semibold">Emergency Alerts</div>
-            <small className="text-muted">
-              Critical system and patient alerts
-            </small>
-          </div>
-          <div className="form-check form-switch">
-            <input
-              className="form-check-input"
-              type="checkbox"
-              checked={settings.emergencyAlerts}
-              onChange={() => handleToggle("emergencyAlerts")}
-            />
-          </div>
-        </div>
-
+        
 
         <div className="d-flex justify-content-between align-items-center border-bottom py-3">
           <div>
@@ -74,29 +60,12 @@ export default function App() {
               type="checkbox"
               checked={settings.systemUpdates}
               onChange={() => handleToggle("systemUpdates")}
+              style={switchStyle}
             />
           </div>
         </div>
 
-
-        <div className="d-flex justify-content-between align-items-center py-3">
-          <div>
-            <div className="fw-semibold">Report Generation</div>
-            <small className="text-muted">
-              Daily and weekly report notifications
-            </small>
-          </div>
-          <div className="form-check form-switch">
-            <input
-              className="form-check-input"
-              type="checkbox"
-              checked={settings.reportGeneration}
-              onChange={() => handleToggle("reportGeneration")}
-            />
-          </div>
-        </div>
       </div>
-
 
       <div className="card p-3 shadow-sm">
         <h5 className="mb-3">Notification Methods</h5>
@@ -107,6 +76,7 @@ export default function App() {
             type="checkbox"
             checked={settings.inApp}
             onChange={() => handleToggle("inApp")}
+            style={switchStyle}
           />
           <label className="form-check-label">In-app notifications</label>
         </div>
@@ -117,6 +87,7 @@ export default function App() {
             type="checkbox"
             checked={settings.email}
             onChange={() => handleToggle("email")}
+            style={switchStyle}
           />
           <label className="form-check-label">Email notifications</label>
         </div>
@@ -127,11 +98,13 @@ export default function App() {
             type="checkbox"
             checked={settings.sms}
             onChange={() => handleToggle("sms")}
+            style={switchStyle}
           />
           <label className="form-check-label">SMS notifications</label>
         </div>
 
       </div>
+
       <div className="text-end mt-4">
         <button className="btn btn-dark px-4">💾 Save Settings</button>
       </div>
