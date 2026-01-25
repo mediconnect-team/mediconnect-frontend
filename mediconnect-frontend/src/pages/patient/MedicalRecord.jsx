@@ -93,13 +93,14 @@ export default function MedicalRecords() {
                         <h4 className="mt-2">1</h4>
                     </Card>
                 </Col>
-
+                {/*
                 <Col md={3}>
                     <Card className="p-3 shadow-sm border-0">
                         <strong>Lab Reports</strong>
                         <h4 className="mt-2">0</h4>
                     </Card>
                 </Col>
+                */}
 
                 <Col md={3}>
                     <Card className="p-3 shadow-sm border-0">
