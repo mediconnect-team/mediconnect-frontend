@@ -14,7 +14,7 @@ export default function Appearance() {
             <small className="text-muted">Switch to dark theme</small>
           </div>
           <div className="form-check form-switch">
-            <input type="checkbox" className="form-check-input" />
+            <input type="checkbox" className="form-check-input" role="switch"/>
           </div>
         </div>
 
@@ -25,7 +25,7 @@ export default function Appearance() {
             <small className="text-muted">Reduce spacing and padding</small>
           </div>
           <div className="form-check form-switch">
-            <input type="checkbox" className="form-check-input" />
+            <input type="checkbox" className="form-check-input" role="switch"/>
           </div>
         </div>
 

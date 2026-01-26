@@ -1,7 +1,7 @@
 import { NavLink, Outlet } from "react-router-dom";
 
 export default function SettingsLayout() {
-  const tabs = ["notification", "appearance", "edit"];
+  const tabs = ["edit-profile", "notification", "appearance"];
 
   return (
     <div className="w-100 p-3">
@@ -22,7 +22,8 @@ export default function SettingsLayout() {
               "pill-tab" + (isActive ? " pill-active" : "")
             }
           >
-            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            {/* {tab.charAt(0).toUpperCase() + tab.slice(1)} */}
+            {tab.replace("-", " ").replace(/\b\w/g, c => c.toUpperCase())}
           </NavLink>
         ))}
       </div>
