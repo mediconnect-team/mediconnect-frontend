@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react";
 import { Modal, Button, Form, Badge, Row, Col } from "react-bootstrap";
 import "./PatientRecords.css"
 
+
 const initialRecords = [
   {
     id: 1,

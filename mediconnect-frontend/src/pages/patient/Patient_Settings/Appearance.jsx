@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function App() {
+export default function Appearance() {
   return (
     <div className="py-2 w-100">
   
@@ -14,8 +14,7 @@ export default function App() {
             <small className="text-muted">Switch to dark theme</small>
           </div>
           <div className="form-check form-switch">
-            <input type="checkbox" className="form-check-input" />
-            
+            <input type="checkbox" className="form-check-input" role="switch"/>
           </div>
         </div>
 
@@ -26,7 +25,7 @@ export default function App() {
             <small className="text-muted">Reduce spacing and padding</small>
           </div>
           <div className="form-check form-switch">
-            <input type="checkbox" className="form-check-input" />
+            <input type="checkbox" className="form-check-input" role="switch"/>
           </div>
         </div>
 
@@ -42,28 +41,6 @@ export default function App() {
             <option>Large</option>
           </select>
         </div>
-      </div>
-
-
-      <div className="card p-3 shadow-sm">
-        <h5 className="mb-3">Dashboard Layout</h5>
-
-        {[
-          "Show Statistics Cards",
-          "Show Recent Appointments",
-          "Show Emergency Alerts",
-          "Sidebar Auto-collapse",
-        ].map((label, i) => (
-          <div
-            key={i}
-            className="d-flex justify-content-between align-items-center border-bottom py-3"
-          >
-            <span className="fw-semibold">{label}</span>
-            <div className="form-check form-switch">
-              <input type="checkbox" className="form-check-input" />
-            </div>
-          </div>
-        ))}
       </div>
 
   

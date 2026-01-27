@@ -6,10 +6,11 @@ import Login from './pages/auth/Login';
 import Register from "./pages/auth/RegisterPatient";
 
 // Settings pages
-import Settings from './pages/patient/Patient_Settings/Settings';
+import SettingsLayout from './pages/patient/Patient_Settings/SettingsLayout';
 import Notification from './pages/patient/Patient_Settings/Notification';
-import Security from './pages/patient/Patient_Settings/Security';
-import System from './pages/patient/Patient_Settings/System';
+import EditProfile from './pages/patient/Patient_Settings/EditProfile';
+// import Security from './pages/patient/Patient_Settings/Security';
+// import System from './pages/patient/Patient_Settings/System';
 import Appearance from './pages/patient/Patient_Settings/Appearance';
 import LandingPage from './pages/LandingPage/LandingPage';
 import MedicalRecords from "./pages/patient/MedicalRecord";
@@ -67,14 +68,21 @@ export default function App() {
         <Route path="emergency" element={<EmergencyContacts />} />
 
         {/* Patient Settings */}
-        <Route path="settings" element={<Settings />}>
-          <Route index element={<div />} />
-          <Route path="general" element={<div />} />
+        <Route path="settings" element={<SettingsLayout />}>
+          <Route index element={<EditProfile />} />
+          <Route path="edit-profile" element={<EditProfile />} />
           <Route path="notification" element={<Notification />} />
-          <Route path="security" element={<Security />} />
-          <Route path="system" element={<System />} />
           <Route path="appearance" element={<Appearance />} />
         </Route>
+
+        {/* 
+          <Route path="/settings" element={<SettingsLayout />}>
+                    <Route index element={<Navigate to="notification" />} />
+                    <Route path="notification" element={<Notification />} />
+                    <Route path="appearance" element={<Appearance />} />
+                    <Route path="edit" element={<EditProfile />} />
+                  </Route>
+        */}
 
       </Route>
 
@@ -88,12 +96,10 @@ export default function App() {
 
         {/* <Route path="reports" element={<DoctorReports />} />
         <Route path="appointments" element={<DoctorAppointments />} /> */}
-        <Route path="settings" element={<Settings />}>
-          <Route index element={<div />} />
-          <Route path="general" element={<div />} />
+        <Route path="settings" element={<SettingsLayout />}>
+          <Route index element={<EditProfile />} />
+          <Route path="edit-profile" element={<EditProfile />} />
           <Route path="notification" element={<Notification />} />
-          <Route path="security" element={<Security />} />
-          <Route path="system" element={<System />} />
           <Route path="appearance" element={<Appearance />} />
         </Route>
       </Route>
@@ -115,12 +121,10 @@ export default function App() {
         {/* <Route path="staff" element={<StaffRegistration />} />
         <Route path="doctors" element={<ManageDoctors />} /> */}
 
-        <Route path="settings" element={<Settings />}>
-          <Route index element={<div />} />
-          <Route path="general" element={<div />} />
+        <Route path="settings" element={<SettingsLayout />}>
+          <Route index element={<EditProfile />} />
+          <Route path="edit-profile" element={<EditProfile />} />
           <Route path="notification" element={<Notification />} />
-          <Route path="security" element={<Security />} />
-          <Route path="system" element={<System />} />
           <Route path="appearance" element={<Appearance />} />
         </Route>
       </Route>
