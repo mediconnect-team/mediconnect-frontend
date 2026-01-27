@@ -1,6 +1,8 @@
 import axios from 'axios' ;
 import { config } from '../utils/constants' ;
 /*
+
+  
 Patient information like name, age etc.
 Number of upcoming appointments for a patient
 Number of medical records for a patients
@@ -94,7 +96,7 @@ export async function getRecentReports() {
 
 export async function NumberOfCompletedAppointments() {
     try{
-        const url = `${config.server}/patient/CompletedAppointments`;
+        const url = `${config.server}/appointments/patient/{patientId}/completed/count`;
         const response = await axios.get(url,{
             headers: {
                 token: localStorage.getItem('token'),
@@ -108,7 +110,7 @@ export async function NumberOfCompletedAppointments() {
 
 export async function TotalNumberOfDoctorsConsulted() {
     try{
-        const url = `${config.server}/patient/TotalDoctorsConsulted`; 
+        const url = `${config.server}/appointments/patient/${patientId}/doctors/count`; 
         const response = await axios.get(url,{
             headers: {
                 token: localStorage.getItem('token'),
@@ -206,3 +208,21 @@ export async function fetchMedicalRecords(){
     }
     
 }
+
+export async function getAvailableSlot(){
+    try{
+        const url = `${config.server}/appointments/slot`;
+
+        const response = await axios.post(url,{
+            headers: {
+                token: localStorage.getItem('token'),
+            }
+        });
+
+        return response.data;
+    }catch(ex){
+        console.error("Error fetching available slots:", ex);
+    }   
+}
+
+
