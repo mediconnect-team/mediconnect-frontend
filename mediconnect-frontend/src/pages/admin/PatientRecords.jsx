@@ -1,52 +1,14 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Modal, Button, Form, Badge, Row, Col } from "react-bootstrap";
-import "./PatientRecords.css"
-
-
-const initialRecords = [
-  {
-    id: 1,
-    type: "consultation",
-    title: "Regular Checkup",
-    patient: "John Doe",
-    doctor: "Dr. Smith",
-    date: "2024-01-22",
-    time: "14:00",
-    description: "Annual physical examination and health assessment",
-    status: "completed",
-    medications: []
-  },
-  {
-    id: 2,
-    type: "lab result",
-    title: "Blood Work Results",
-    patient: "Sarah Wilson",
-    doctor: "Dr. Johnson",
-    date: "2024-01-20",
-    time: "08:30",
-    description: "Complete blood count and metabolic panel",
-    status: "completed",
-    medications: []
-  },
-  {
-    id: 3,
-    type: "prescription",
-    title: "Blood Pressure Medication",
-    patient: "John Doe",
-    doctor: "Dr. Smith",
-    date: "2024-01-18",
-    time: "10:00",
-    description: "Prescription for hypertension management",
-    status: "active",
-    medications: [
-      { name: "Amlodipine - 5mg", note: "Once daily for 90 days" }
-    ]
-  }
-];
+import "./PatientRecords.css";
+import api from "../../api/axios";
 
 export default function PatientRecords1() {
-  const [records, setRecords] = useState(initialRecords);
-  const [selected, setSelected] = useState(initialRecords[0]);
+  const [records, setRecords] = useState([]);
+  const [selected, setSelected] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
+  const [appointments, setAppointments] = useState([]);
 
   const [show, setShow] = useState(false);
   const [search, setSearch] = useState("");
@@ -54,15 +16,59 @@ export default function PatientRecords1() {
   const [filterType, setFilterType] = useState("All");
 
   const [formData, setFormData] = useState({
-    title: "",
-    patient: "",
-    doctor: "",
-    date: "",
-    time: "",
-    type: "consultation",
-    description: "",
-    medications: ""
+    recordType: ""
   });
+
+  /* ================= FETCH RECORDS ================= */
+
+  const fetchMedicalRecords = async () => {
+    try {
+      const res = await api.get("/admin/medical-records");
+
+      const mapped = res.data.map(r => ({
+        id: r.medicalRecordId,
+        appointmentId: r.appointmentId,
+        type: r.recordType.toLowerCase(), // normalize
+        title: r.fileName,
+        patient: r.patientName,
+        doctor: r.doctorName,
+        date: r.appointmentDate,
+        time: r.startTime,
+        description: r.reason,
+        status: r.appointmentStatus.toLowerCase(),
+        medications: []
+      }));
+
+      setRecords(mapped);
+      setSelected(mapped[0] || null);
+      setSelectedAppointmentId(mapped[0]?.appointmentId || null);
+    } catch (err) {
+      console.error("Error fetching records", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchMedicalRecords();
+  }, []);
+
+
+  useEffect(() => {
+  const loadAppointments = async () => {
+    try {
+      const res = await api.get("/admin/appointments");
+      setAppointments(res.data);
+    } catch (err) {
+      console.error("Error loading appointments", err);
+    }
+  };
+
+  loadAppointments();
+}, []);
+
+
+
+
+  /* ================= FILTERING ================= */
 
   const patients = ["All", ...new Set(records.map(r => r.patient))];
 
@@ -75,37 +81,95 @@ export default function PatientRecords1() {
 
       const matchPatient =
         filterPatient === "All" || r.patient === filterPatient;
-      const matchType = filterType === "All" || r.type === filterType;
+
+      const matchType =
+        filterType === "All" || r.type === filterType;
 
       return matchSearch && matchPatient && matchType;
     });
   }, [records, search, filterPatient, filterType]);
 
-  const handleAddRecord = () => {
-    const newRecord = {
-      ...formData,
-      id: records.length + 1,
-      status: "active",
-      medications:
-        formData.type === "prescription"
-          ? [{ name: formData.medications, note: "" }]
-          : []
-    };
+  useEffect(() => {
+    setSelected(filteredRecords[0] || null);
+    setSelectedAppointmentId(filteredRecords[0]?.appointmentId || null);
+  }, [filteredRecords]);
 
-    setRecords([newRecord, ...records]);
-    setShow(false);
+  /* ================= ADD RECORD ================= */
+
+  const handleAddRecord = async () => {
+    if (!selectedAppointmentId || !formData.recordType || !selectedFile) {
+      alert("Please select record, record type and file");
+      return;
+    }
+
+    const form = new FormData();
+    form.append("appointmentId", selectedAppointmentId);
+    form.append("recordType", formData.recordType);
+    form.append("file", selectedFile);
+
+    try {
+      await api.post("/admin/add-medical-record", form, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+
+      await fetchMedicalRecords();
+
+      // reset modal
+      setShow(false);
+      setSelectedFile(null);
+      setFormData({ recordType: "" });
+
+    } catch (err) {
+      console.error("Upload failed", err);
+      alert("File upload failed");
+    }
   };
 
-  const badgeColor = (type) => {
-    if (type === "consultation") return "primary";
-    if (type === "lab result") return "success";
-    if (type === "prescription") return "warning";
-    return "secondary";
+
+
+  const handleExport = async () => {
+    if (!selected) {
+      alert("Please select a record first");
+      return;
+    }
+
+    try {
+      const response = await api.get(
+        `/admin/medical-records/${selected.id}/download`,
+        { responseType: "blob" }
+      );
+
+      const blob = new Blob([response.data]);
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = selected.title; 
+      document.body.appendChild(link);
+      link.click();
+
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Export failed", error);
+      alert("File download failed");
+    }
   };
 
-  const statusColor = (status) => {
-    return status === "completed" ? "secondary" : "dark";
-  };
+
+
+  /* ================= UI HELPERS ================= */
+
+  const badgeColor = type =>
+    type === "prescription" ? "warning" :
+    type === "report" ? "success" : "secondary";
+
+  const statusColor = status =>
+    status === "completed" || status === "scheduled"
+      ? "secondary"
+      : "dark";
+
+  /* ================= RENDER ================= */
 
   return (
     <div className="container-lg py-4">
@@ -113,9 +177,7 @@ export default function PatientRecords1() {
       <div className="d-flex justify-content-between align-items-center mb-3">
         <div>
           <h3 className="fw-bold">Medical Records</h3>
-          <p className="text-muted">
-            View and manage patient medical records and history
-          </p>
+          <p className="text-muted">View and manage patient medical records</p>
         </div>
         <Button className="btn-dark" onClick={() => setShow(true)}>
           + Add Record
@@ -129,13 +191,13 @@ export default function PatientRecords1() {
             <Form.Control
               placeholder="Search records by patient, title, or doctor..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={e => setSearch(e.target.value)}
             />
           </Col>
           <Col md={3}>
             <Form.Select
               value={filterPatient}
-              onChange={(e) => setFilterPatient(e.target.value)}
+              onChange={e => setFilterPatient(e.target.value)}
             >
               {patients.map((p, i) => (
                 <option key={i}>{p}</option>
@@ -145,70 +207,69 @@ export default function PatientRecords1() {
           <Col md={3}>
             <Form.Select
               value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
+              onChange={e => setFilterType(e.target.value)}
             >
               <option value="All">All Types</option>
-              <option value="consultation">Consultation</option>
-              <option value="lab result">Lab Result</option>
+              <option value="x-ray">X-Ray</option>
+              <option value="report">Report</option>
               <option value="prescription">Prescription</option>
             </Form.Select>
           </Col>
         </Row>
       </div>
 
-      {/* Grid Layout */}
+      {/* Records List */}
       <Row className="g-4">
-        {/* Left List */}
         <Col md={7}>
-          {filteredRecords.map((record) => (
+          {filteredRecords.map(record => (
             <div
               key={record.id}
               className={`record-card-modern mb-3 ${
                 selected?.id === record.id ? "active-card" : ""
               }`}
-              onClick={() => setSelected(record)}
+              onClick={() => {
+                setSelected(record);
+                setSelectedAppointmentId(record.appointmentId);
+              }}
             >
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <h6 className="fw-semibold mb-1">{record.title}</h6>
-                  <small className="text-muted">{record.patient}</small>
-                </div>
-
-                <div className="d-flex gap-1">
-                  <Badge bg={badgeColor(record.type)} className="rounded-pill">
-                    {record.type}
-                  </Badge>
-                  <Badge bg={statusColor(record.status)} className="rounded-pill">
-                    {record.status}
-                  </Badge>
-                </div>
+              <h6>{record.title}</h6>
+              <small>{record.patient}</small>
+              <div className="mt-2">
+                <Badge bg={badgeColor(record.type)}>{record.type}</Badge>{" "}
+                <Badge bg={statusColor(record.status)}>{record.status}</Badge>
               </div>
-
               <div className="text-muted small mt-2">
                 {record.date} • {record.doctor}
               </div>
-
-              <div className="mt-2 small">{record.description}</div>
+              <div className="small mt-2">{record.description}</div>
             </div>
           ))}
         </Col>
 
-        {/* Right Details */}
+        {/* Details */}
         <Col md={5}>
           {selected && (
             <div className="details-card-modern">
+              {/* Header + Export */}
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <h6 className="fw-semibold mb-0">Record Details</h6>
-                <Button size="sm" variant="outline-secondary">
+
+                <Button
+                  size="sm"
+                  variant="outline-secondary"
+                  onClick={handleExport}
+                >
                   Export
                 </Button>
               </div>
 
+              {/* Title */}
               <div className="mb-2">
                 <div className="text-muted small">Title</div>
                 <div className="fw-medium">{selected.title}</div>
               </div>
 
+              {/* Patient + Doctor */}
               <Row>
                 <Col>
                   <div className="text-muted small">Patient</div>
@@ -220,6 +281,7 @@ export default function PatientRecords1() {
                 </Col>
               </Row>
 
+              {/* Date + Time */}
               <Row className="mt-2">
                 <Col>
                   <div className="text-muted small">Date</div>
@@ -231,25 +293,15 @@ export default function PatientRecords1() {
                 </Col>
               </Row>
 
+              {/* Description */}
               <div className="mt-3">
                 <div className="text-muted small">Description</div>
                 <div>{selected.description}</div>
               </div>
-
-              {selected.type === "prescription" && (
-                <div className="mt-3">
-                  <div className="text-muted small">Medications</div>
-                  {selected.medications.map((m, i) => (
-                    <div key={i} className="med-box">
-                      <strong>{m.name}</strong>
-                      <div className="small text-muted">{m.note}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
           )}
         </Col>
+
       </Row>
 
       {/* Modal */}
@@ -260,77 +312,38 @@ export default function PatientRecords1() {
 
         <Modal.Body>
           <Form>
-            <Form.Control
-              className="mb-2"
-              placeholder="Title"
-              onChange={(e) =>
-                setFormData({ ...formData, title: e.target.value })
-              }
-            />
-            <Form.Control
-              className="mb-2"
-              placeholder="Patient"
-              onChange={(e) =>
-                setFormData({ ...formData, patient: e.target.value })
-              }
-            />
-            <Form.Control
-              className="mb-2"
-              placeholder="Doctor"
-              onChange={(e) =>
-                setFormData({ ...formData, doctor: e.target.value })
-              }
-            />
+            {/* Appointment Selector */}
             <Form.Select
-              className="mb-2"
-              onChange={(e) =>
-                setFormData({ ...formData, type: e.target.value })
-              }
+              className="mb-3"
+              value={selectedAppointmentId || ""}
+              onChange={(e) => setSelectedAppointmentId(Number(e.target.value))}
             >
-              <option value="consultation">Consultation</option>
-              <option value="lab result">Lab Result</option>
-              <option value="prescription">Prescription</option>
+              <option value="">Select Patient & Doctor</option>
+              {appointments.map(a => (
+                <option key={a.appointmentId} value={a.appointmentId}>
+                  {a.patientName} → {a.doctorName} ({a.appointmentDate})
+                </option>
+              ))}
             </Form.Select>
 
-            <Row>
-              <Col>
-                <Form.Control
-                  type="date"
-                  className="mb-2"
-                  onChange={(e) =>
-                    setFormData({ ...formData, date: e.target.value })
-                  }
-                />
-              </Col>
-              <Col>
-                <Form.Control
-                  type="time"
-                  className="mb-2"
-                  onChange={(e) =>
-                    setFormData({ ...formData, time: e.target.value })
-                  }
-                />
-              </Col>
-            </Row>
+
+            <Form.Select
+              value={formData.recordType}
+              onChange={e =>
+                setFormData({ recordType: e.target.value })
+              }
+            >
+              <option value="">Select Record Type</option>
+              <option value="X-RAY">X-Ray</option>
+              <option value="REPORT">Report</option>
+              <option value="PRESCRIPTION">Prescription</option>
+            </Form.Select>
 
             <Form.Control
-              as="textarea"
-              rows={2}
-              placeholder="Description"
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
-              }
+              type="file"
+              className="mt-3"
+              onChange={e => setSelectedFile(e.target.files[0])}
             />
-
-            {formData.type === "prescription" && (
-              <Form.Control
-                className="mt-2"
-                placeholder="Medication (e.g. Amlodipine - 5mg)"
-                onChange={(e) =>
-                  setFormData({ ...formData, medications: e.target.value })
-                }
-              />
-            )}
           </Form>
         </Modal.Body>
 

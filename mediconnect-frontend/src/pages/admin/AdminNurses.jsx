@@ -1,44 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-
-const initialNurses = [
-  {
-    id: 1,
-    name: "Sarah Johnson",
-    department: "Emergency Department",
-    status: "active",
-    phone: "+1-555-0201",
-    email: "sarah.johnson@hospital.com",
-  },
-  {
-    id: 2,
-    name: "Michael Brown",
-    department: "ICU",
-    status: "active",
-    phone: "+1-555-0202",
-    email: "michael.brown@hospital.com",
-  },
-  {
-    id: 3,
-    name: "Emily Davis",
-    department: "Pediatric Medicine",
-    status: "active",
-    phone: "+1-555-0203",
-    email: "emily.davis@hospital.com",
-  },
-];
+import api from "../../api/axios";
 
 const departments = [
   "All Departments",
-  "Emergency Department",
-  "ICU",
-  "Pediatric Medicine",
+  "Cardiology",
+  "Orthopedics",
+  "Neurology",
 ];
 
 const statuses = ["All Status", "active", "inactive"];
 
 export default function NurseManagement() {
-  const [nurses, setNurses] = useState(initialNurses);
+  const [nurses, setNurses] = useState([]);
+  const [allNurses, setAllNurses] = useState([]);
+
   const [filterDept, setFilterDept] = useState("All Departments");
   const [filterStatus, setFilterStatus] = useState("All Status");
 
@@ -47,15 +23,33 @@ export default function NurseManagement() {
 
   const [newNurse, setNewNurse] = useState({
     name: "",
-    department: "",
-    status: "",
-    phone: "",
     email: "",
+    phone: "",
+    departmentId: "",
+    active: true,
   });
 
-  /* ---------------- FILTERS ---------------- */
+  /* ---------------- FETCH NURSES ---------------- */
+  useEffect(() => {
+    const fetchNurses = async () => {
+      try {
+        const res = await api.get("/admin/nurses");
+        // console.log("API Response : ", res.data);
+        setNurses(res.data);
+        setAllNurses(res.data);
+      } catch (err) {
+        console.error("Error loading nurses:", err);
+      }
+    };
+
+    fetchNurses();
+  }, []);
+
+
+  /* ---------------- FILTER LOGIC ---------------- */
 
   const filteredNurses = nurses.filter((n) => {
+    console.log("Nurse Object : ", n);
     return (
       (filterDept === "All Departments" || n.department === filterDept) &&
       (filterStatus === "All Status" || n.status === filterStatus)
@@ -69,59 +63,104 @@ export default function NurseManagement() {
     setNewNurse((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleDelete = (id) => {
-    setNurses((prev) => prev.filter((n) => n.id !== id));
-  };
+  const handleAddClick = () => {
+  setEditingNurseId(null);
+  setNewNurse({
+    name: "",
+    email: "",
+    phone: "",
+    departmentId: "",
+    active: true,
+  });
+  setShowModal(true);
+};
+
 
   const handleEditClick = (nurse) => {
-    setEditingNurseId(nurse.id);
-    setNewNurse({
-      name: nurse.name,
-      department: nurse.department,
-      status: nurse.status,
-      phone: nurse.phone,
-      email: nurse.email,
-    });
-    setShowModal(true);
+  const departmentMap = {
+    Cardiology: "1",
+    Orthopedics: "2",
+    Neurology: "3",
   };
 
-  const handleAddClick = () => {
-    setEditingNurseId(null);
-    setNewNurse({
-      name: "",
-      department: "",
-      status: "",
-      phone: "",
-      email: "",
-    });
-    setShowModal(true);
-  };
+  setEditingNurseId(nurse.id);
+  setNewNurse({
+    name: nurse.name,
+    email: nurse.email,
+    phone: nurse.phone,
+    departmentId: departmentMap[nurse.department] || "",
+    active: nurse.status === "active",
+  });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  setShowModal(true);
+};
 
-    if (!newNurse.name || !newNurse.department || !newNurse.status) {
-      alert("Please fill required fields");
-      return;
-    }
 
-    if (editingNurseId === null) {
-      // ADD
-      setNurses((prev) => [
-        ...prev,
-        { ...newNurse, id: Date.now() },
-      ]);
+  const handleDelete = async (id) => {
+  const confirmDelete = window.confirm(
+    "Are you sure you want to delete this nurse?"
+  );
+
+  if (!confirmDelete) return;
+
+  try {
+    //call backend delete
+    await api.delete(`/nurses/delete/${id}`);
+
+    //refresh from DB
+    const res = await api.get("/admin/nurses");
+    setNurses(res.data);
+    setAllNurses(res.data);
+  } catch (err) {
+    console.error("Failed to delete nurse:", err);
+  }
+};
+
+
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
+    if (editingNurseId) {
+      // UPDATE nurse
+      await api.put(`/nurses/update/${editingNurseId}`, newNurse);
     } else {
-      // UPDATE
-      setNurses((prev) =>
-        prev.map((n) =>
-          n.id === editingNurseId ? { ...n, ...newNurse } : n
-        )
-      );
+      //ADD nurse 
+      await api.post("/nurses/add-nurse", newNurse);
     }
+
+    // refresh list from DB
+    const res = await api.get("/admin/nurses");
+    setNurses(res.data);
+    setAllNurses(res.data);
 
     setShowModal(false);
     setEditingNurseId(null);
+  } catch (err) {
+    console.error("Failed to save nurse:", err);
+  }
+};
+
+
+
+
+  /* ---------------- SEARCH ---------------- */
+
+  const handleSearch = (e) => {
+    const term = e.target.value.toLowerCase();
+
+    if (!term) {
+      setNurses(allNurses);
+      return;
+    }
+
+    setNurses(
+      allNurses.filter(
+        (n) =>
+          n.name.toLowerCase().includes(term) ||
+          n.department.toLowerCase().includes(term)
+      )
+    );
   };
 
   /* ---------------- UI ---------------- */
@@ -146,20 +185,7 @@ export default function NurseManagement() {
           type="text"
           className="form-control"
           placeholder="Search nurses by name or department"
-          onChange={(e) => {
-            const term = e.target.value.toLowerCase();
-            if (!term) {
-              setNurses(initialNurses);
-              return;
-            }
-            setNurses(
-              initialNurses.filter(
-                (n) =>
-                  n.name.toLowerCase().includes(term) ||
-                  n.department.toLowerCase().includes(term)
-              )
-            );
-          }}
+          onChange={handleSearch}
         />
 
         <select
@@ -212,14 +238,10 @@ export default function NurseManagement() {
               </div>
 
               <h5>{nurse.name}</h5>
-              <p>
-                <strong>Department:</strong> {nurse.department}
-              </p>
-              <p>
-                <strong>Status:</strong> {nurse.status}
-              </p>
-              <p>{nurse.phone}</p>
-              <p>{nurse.email}</p>
+              <p><strong>Department:</strong> {nurse.department}</p>
+              <p><strong>Status:</strong> {nurse.status}</p>
+              <p><strong>Phone:</strong> {nurse.phone}</p>
+              <p><strong>Email:</strong> {nurse.email}</p>
             </div>
           </div>
         ))}
@@ -232,10 +254,7 @@ export default function NurseManagement() {
           style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
           onClick={() => setShowModal(false)}
         >
-          <div
-            className="modal-dialog"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
             <div className="modal-content p-4">
               <h5 className="mb-3">
                 {editingNurseId ? "Update Nurse" : "Add New Nurse"}
@@ -269,30 +288,32 @@ export default function NurseManagement() {
 
                 <select
                   className="form-select mb-2"
-                  name="department"
-                  value={newNurse.department}
+                  name="departmentId"
+                  value={newNurse.departmentId}
                   onChange={handleInputChange}
                   required
                 >
                   <option value="">Select Department</option>
-                  {departments
-                    .filter((d) => d !== "All Departments")
-                    .map((d) => (
-                      <option key={d}>{d}</option>
-                    ))}
+                  <option value="1">Cardiology</option>
+                  <option value="2">Orthopedics</option>
+                  <option value="3">Neurology</option>
                 </select>
+
 
                 <select
                   className="form-select mb-3"
-                  name="status"
-                  value={newNurse.status}
-                  onChange={handleInputChange}
-                  required
+                  value={newNurse.active}
+                  onChange={(e) =>
+                    setNewNurse(prev => ({
+                      ...prev,
+                      active: e.target.value === "true"
+                    }))
+                  }
                 >
-                  <option value="">Select Status</option>
-                  <option value="active">active</option>
-                  <option value="inactive">inactive</option>
+                  <option value="true">active</option>
+                  <option value="false">inactive</option>
                 </select>
+
 
                 <div className="text-end">
                   <button
