@@ -16,7 +16,7 @@ export default function Sidebar({ collapsed, toggleCollapse }) {
 
     // ROLE-BASED MENUS
     const menus = {
-        PATIENT: [
+        ROLE_PATIENT: [
             { to: "/patient/dashboard", label: "Dashboard", icon: "bi-speedometer2" },
             { to: "/patient/appointments", label: "My Appointments", icon: "bi-calendar-event" },
             // { to: "/patient/payments", label: "Payments", icon: "bi-wallet2" },
@@ -25,7 +25,7 @@ export default function Sidebar({ collapsed, toggleCollapse }) {
             { to: "/patient/settings", label: "Settings", icon: "bi-gear" },
         ],
 
-        DOCTOR: [
+        ROLE_DOCTOR: [
             { to: "/doctor/dashboard", label: "Dashboard", icon: "bi-speedometer2" },
             { to: "/doctor/reports", label: "Patient Reports", icon: "bi-file-medical" },
             { to: "/doctor/schedule", label: "Doctor Schedule", icon: "bi-calendar-week" },
@@ -34,7 +34,7 @@ export default function Sidebar({ collapsed, toggleCollapse }) {
         ],
 
 
-        ADMIN: [
+        ROLE_ADMIN: [
             { to: "/admin/dashboard", label: "Dashboard", icon: "bi-speedometer" },
             { to: "/admin/staff/registration", label: "Staff Registration", icon: "bi-person-plus" },
             { to: "/admin/staff/directory", label: "Staff Directory", icon: "bi-people" },
@@ -46,7 +46,6 @@ export default function Sidebar({ collapsed, toggleCollapse }) {
             { to: "/admin/records", label: "Medical Records", icon: "bi-file-earmark-medical" },
             { to: "/admin/settings", label: "Settings", icon: "bi-gear" },
         ],
-
     };
 
     const activeMenu = menus[user.role];

@@ -3,15 +3,18 @@ import StatCard from "../../components/patient/StatCard";
 import AppointmentCard from "../../components/patient/AppointmentCard";
 import ReportCard from "../../components/patient/ReportCard";
 import QuickActionCard from './../../components/patient/QuickAction';
-import { getAllDoctors, getUpcomingAppointments , getActivePrescriptions,NumberOfCompletedAppointments,TotalNumberOfDoctorsConsulted,getDoctorsByBranch,getRecentReports,getMedicalRecords } from "../../services/patientApi";
-import { useState,useEffect  } from "react";
+import { getAllDoctors, getUpcomingAppointments, getActivePrescriptions, NumberOfCompletedAppointments, TotalNumberOfDoctorsConsulted, getDoctorsByBranch, getRecentReports, getMedicalRecords } from "../../services/patientApi";
+import { useState, useEffect } from "react";
+
+import useAuth from "../../hooks/useAuth";
 
 export default function PatientDashboard() {
+    const { user } = useAuth();
     const [UpcomingAppointments, setUpcomingAppointments] = useState([]);
     const [MedicalRecords, setMedicalRecords] = useState([]);
     const [ActivePrescriptions, setActivePrescriptions] = useState(0);
     const [RecentReports, setRecentReports] = useState([]);
-    
+
 
     const fetchUpcomingAppointments = async () => {
         // Fetch upcoming appointments from API
@@ -21,25 +24,25 @@ export default function PatientDashboard() {
         }
     }
 
-    const fetchRecentReports = async () => {    
+    const fetchRecentReports = async () => {
         // Fetch recent reports from API
-        const data = await getRecentReports();  
+        const data = await getRecentReports();
         if (data) {
             setRecentReports(data);
-        }   
+        }
     }
-    const fetchMedicalRecords = async () => {    
+    const fetchMedicalRecords = async () => {
         // Fetch medical records from API
         const data = await getMedicalRecords();
         if (data) {
             setMedicalRecords(data);
         }
     }
-    
+
     const fetchDashboardData = async () => {
-       
+
         const activePrescriptions = await getActivePrescriptions();
-       
+
 
         if (activePrescriptions) {
             setActivePrescriptions(activePrescriptions);
@@ -50,7 +53,7 @@ export default function PatientDashboard() {
         fetchDashboardData();
         fetchUpcomingAppointments();
         fetchRecentReports();
-        
+
         fetchMedicalRecords();
     }, []);
 
@@ -59,7 +62,7 @@ export default function PatientDashboard() {
 
             {/* Title */}
             <PageTitle
-                title="Welcome Back, John!"
+                title={`Welcome Back, ${user?.name || 'User'}!`}
                 subtitle="Here's an overview of your health information"
             />
 
@@ -69,7 +72,7 @@ export default function PatientDashboard() {
                 <div className="col-md-3">
                     <StatCard
                         label="Upcoming Appointments"
-                        value="2"
+                        value={UpcomingAppointments.length}
                         icon="bi-calendar2-week"
                         iconColor="#0066ff"
                     />
@@ -78,7 +81,7 @@ export default function PatientDashboard() {
                 <div className="col-md-3">
                     <StatCard
                         label="Pending Bills"
-                        value="$350"
+                        value="$0"
                         icon="bi-credit-card"
                         iconColor="#ff3b3b"
                     />
@@ -87,7 +90,7 @@ export default function PatientDashboard() {
                 <div className="col-md-3">
                     <StatCard
                         label="Medical Records"
-                        value="15"
+                        value={MedicalRecords.length}
                         icon="bi-file-earmark-medical"
                         iconColor="#00a65a"
                     />
@@ -96,7 +99,7 @@ export default function PatientDashboard() {
                 <div className="col-md-3">
                     <StatCard
                         label="Active Prescriptions"
-                        value="3"
+                        value={ActivePrescriptions}
                         icon="bi-heart-pulse"
                         iconColor="#8a2be2"
                     />

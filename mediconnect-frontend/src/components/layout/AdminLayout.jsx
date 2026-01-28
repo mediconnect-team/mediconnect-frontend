@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
 import { Outlet } from "react-router-dom";
 
-export default function AdminLayout() {
+export default function AdminLayout({ children }) {
     const [collapsed, setCollapsed] = useState(false);
 
     const toggleCollapse = () => setCollapsed(prev => !prev);
@@ -30,7 +30,7 @@ export default function AdminLayout() {
                     transition: "margin-left 0.3s",
                 }}
             >
-                <Outlet />
+                {children}
             </main>
         </div>
     );

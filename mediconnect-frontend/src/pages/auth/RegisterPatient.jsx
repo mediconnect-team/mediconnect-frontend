@@ -4,7 +4,7 @@ import useAuth from "../../hooks/useAuth";
 
 export default function Register() {
     const navigate = useNavigate();
-    const { registerUser } = useAuth(); // This will work once backend arrives
+    const { register } = useAuth(); // Now getting register function
 
     const [form, setForm] = useState({
         name: "",
@@ -12,6 +12,8 @@ export default function Register() {
         phone: "",
         address: "",
         dob: "",
+        bloodGroup: "",
+        gender: "",
         password: "",
         confirmPassword: "",
     });
@@ -22,7 +24,7 @@ export default function Register() {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (form.password !== form.confirmPassword) {
@@ -30,9 +32,14 @@ export default function Register() {
             return;
         }
 
-        // Mock success (until backend)
-        alert("Registration successful!");
-        navigate("/login");
+        const payload = { ...form, userRole: "ROLE_PATIENT" };
+        const success = await register(payload);
+        if (success) {
+            alert("Registration successful! Please login.");
+            navigate("/login");
+        } else {
+            setError("Registration failed. Try again.");
+        }
     };
 
     return (
@@ -114,6 +121,47 @@ export default function Register() {
                         onChange={handleChange}
                         required
                     />
+
+                    <div className="row">
+                        {/* Gender */}
+                        <div className="col-md-6 mb-3">
+                            <label className="fw-semibold">Gender</label>
+                            <select
+                                name="gender"
+                                className="form-select"
+                                value={form.gender}
+                                onChange={handleChange}
+                                required
+                            >
+                                <option value="">Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        {/* Blood Group */}
+                        <div className="col-md-6 mb-3">
+                            <label className="fw-semibold">Blood Group</label>
+                            <select
+                                name="bloodGroup"
+                                className="form-select"
+                                value={form.bloodGroup}
+                                onChange={handleChange}
+                                required
+                            >
+                                <option value="">Select Blood Group</option>
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                            </select>
+                        </div>
+                    </div>
 
                     {/* Address */}
                     <label className="fw-semibold">Address</label>
