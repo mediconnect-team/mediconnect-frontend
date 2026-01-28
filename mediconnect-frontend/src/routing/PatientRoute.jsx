@@ -6,7 +6,7 @@ export default function PatientRoute() {
     const { user } = useAuth();
 
     if (!user) return <Navigate to="/login" replace />;
-    if (user.role !== "PATIENT") return <Navigate to="/login" replace />;
+    if (user.role !== "PATIENT" && user.role !== "ROLE_PATIENT") return <Navigate to="/login" replace />;
 
     return (
         <PatientLayout>

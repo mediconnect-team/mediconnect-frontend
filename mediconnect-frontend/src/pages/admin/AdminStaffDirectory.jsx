@@ -1,17 +1,44 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./adminStaff.css";
+import { getAllStaff } from "../../services/adminsApi";
 
 export default function StaffDirectory() {
     const [searchTerm, setSearchTerm] = useState("");
     const [roleFilter, setRoleFilter] = useState("ALL");
+    const [staff, setStaff] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
 
-    // Mock test data (replace with API later)
-    const staff = [
-        { id: 1, name: "Dr. Emily Johnson", role: "Doctor", email: "emily@hospital.com" },
-        { id: 2, name: "Sarah Miller", role: "Nurse", email: "sarah@hospital.com" },
-        { id: 3, name: "Mike Wilson", role: "Administrator", email: "mike@hospital.com" },
-        { id: 4, name: "Dr. Robert Chen", role: "Doctor", email: "robert@hospital.com" },
-    ];
+    // Fetch Data from Backend
+    useEffect(() => {
+        const fetchStaff = async () => {
+            try {
+                const data = await getAllStaff();
+                // Map backend DTO to frontend structure if needed, or use directly
+                // Backend: { id, name, email, userRole }
+                // Frontend expected: { id, name, email, role } (we need to map userRole -> role)
+                const mappedData = data.map(u => ({
+                    id: u.id,
+                    name: u.name,
+                    email: u.email,
+                    role: formatRole(u.userRole) // Helper to clean up "ROLE_DOCTOR" -> "Doctor"
+                }));
+                setStaff(mappedData);
+            } catch (err) {
+                setError("Failed to load staff directory.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchStaff();
+    }, []);
+
+    const formatRole = (roleString) => {
+        if (!roleString) return "Staff";
+        // ROLE_DOCTOR -> Doctor
+        return roleString.replace("ROLE_", "").charAt(0).toUpperCase() + roleString.replace("ROLE_", "").slice(1).toLowerCase();
+    };
 
     // FILTERED RESULTS
     const filteredStaff = staff.filter((member) => {
@@ -19,10 +46,17 @@ export default function StaffDirectory() {
             member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             member.email.toLowerCase().includes(searchTerm.toLowerCase());
 
-        const matchesRole = roleFilter === "ALL" || member.role === roleFilter;
+        // Frontend role is now "Doctor", "Nurse", "Admin" (from formatRole)
+        // Filter values are "Doctor", "Nurse", "Administrator" (Note: "Administrator" vs "Admin" check)
+        const matchesRole = roleFilter === "ALL" ||
+            member.role === roleFilter ||
+            (roleFilter === "Administrator" && member.role === "Admin");
 
         return matchesSearch && matchesRole;
     });
+
+    if (loading) return <div className="p-4 text-center">Loading staff directory...</div>;
+    if (error) return <div className="p-4 text-center text-danger">{error}</div>;
 
     return (
         <div className="staff-directory card p-4">

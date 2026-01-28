@@ -6,22 +6,33 @@ export default function Login() {
     const { login } = useAuth();
     const navigate = useNavigate();
 
-    const [role, setRole] = useState("Patient");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        setError("");
 
-        const success = login(role.toLowerCase(), email, password);
+        // Function is now async
+        const success = await login(email, password);
 
         if (!success) {
-            setError("Invalid credentials");
+            setError("Invalid credentials or login failed.");
             return;
         }
 
-        navigate(`/${role.toLowerCase()}/dashboard`);
+        // After successful login, we need to check the updated user state/role
+        const storedUser = JSON.parse(localStorage.getItem("user"));
+        if (storedUser && storedUser.role) {
+            // Backend might return "ROLE_PATIENT", "ROLE_DOCTOR", etc.
+            // We need to strip "ROLE_" and convert to lowercase for the URL.
+            const roleForUrl = storedUser.role.replace("ROLE_", "").toLowerCase();
+            navigate(`/${roleForUrl}/dashboard`);
+        } else {
+            // Fallback if something goes wrong
+            setError("Login successful but role not found.");
+        }
     };
 
     return (
@@ -39,7 +50,6 @@ export default function Login() {
                         className="bi bi-heart-pulse"
                         style={{ fontSize: "3rem", color: "#121212" }}
                     ></i>
-
                 </div>
 
                 {/* Title */}
@@ -49,18 +59,6 @@ export default function Login() {
                 {error && <div className="alert alert-danger">{error}</div>}
 
                 <form onSubmit={handleSubmit}>
-                    {/* Role Select */}
-                    <label className="fw-semibold mb-1">Login as</label>
-                    <select
-                        className="form-select mb-3"
-                        value={role}
-                        onChange={(e) => setRole(e.target.value)}
-                        style={{ padding: "10px", borderRadius: "10px" }}
-                    >
-                        <option>Patient</option>
-                        <option>Doctor</option>
-                        <option>Admin</option>
-                    </select>
 
                     {/* Email */}
                     <label className="fw-semibold mb-1">Email Address</label>

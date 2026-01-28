@@ -7,7 +7,7 @@ function DoctorRoute() {
     const { user } = useAuth();
 
     if (!user) return <Navigate to="/login" replace />;
-    if (user.role !== "DOCTOR") return <Navigate to="/login" replace />;
+    if (user.role !== "DOCTOR" && user.role !== "ROLE_DOCTOR") return <Navigate to="/login" replace />;
 
     return (
         <DoctorLayout>
