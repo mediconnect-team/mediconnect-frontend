@@ -1,155 +1,350 @@
-import React from "react";
+import React, { useState } from "react";
 import { ArrowLeft } from "lucide-react";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import useAuth from '../../hooks/useAuth';
+import { holdSlot } from '../../services/patientApi';
 
 const CompletePayment = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useAuth();
+  const { selectedDoctor, selectedDate, selectedTime, appointmentType, notes, appointmentId, status } = location.state || {};
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  if (!selectedDoctor || !selectedDate || !selectedTime) {
+    navigate("/patient/appointments");
+    return null;
+  }
+
+  const handlePayment = async () => {
+    if (!user?.id) {
+      alert("User not authenticated. Please login again.");
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      // If appointment is already booked (from step 4), just proceed with payment
+      if (appointmentId) {
+        alert(`Payment successful! Your appointment (ID: ${appointmentId}) is confirmed.`);
+        navigate("/patient/dashboard");
+        return;
+      }
+
+      // Fallback: Book appointment if not already booked (old flow)
+      const startTimeStr = selectedTime.length === 5 ? `${selectedTime}:00` : selectedTime;
+      
+      const [hours, minutes] = startTimeStr.split(':').map(Number);
+      const endMinutes = minutes + 30;
+      const endHours = hours + Math.floor(endMinutes / 60);
+      const finalEndMinutes = endMinutes % 60;
+      const endTimeStr = `${endHours.toString().padStart(2, '0')}:${finalEndMinutes.toString().padStart(2, '0')}:00`;
+
+      const holdSlotData = {
+        doctorId: selectedDoctor.doctorId,
+        patientId: user.id,
+        date: selectedDate.toISOString().split('T')[0],
+        startTime: startTimeStr,
+        endTime: endTimeStr,
+        appointmentType: appointmentType
+      };
+
+      const response = await holdSlot(holdSlotData);
+      
+      if (response && response.appointmentId) {
+        alert(`Appointment booked and payment successful! Appointment ID: ${response.appointmentId}`);
+        navigate("/patient/dashboard");
+      } else {
+        alert("Failed to complete booking. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error processing payment:", error);
+      alert("Failed to process payment. Please try again.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   return (
     <div className="payment-wrapper">
       <style>{`
         .payment-wrapper {
           font-family: 'Inter', sans-serif;
-          padding: 40px 80px;
-          background: linear-gradient(to bottom right, #f1f5ff, #fff);
+          padding: 20px 40px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           min-height: 100vh;
+          color: #333;
         }
 
         .back {
           display: flex;
           align-items: center;
-          gap: 5px;
+          gap: 8px;
           cursor: pointer;
-          color: #444;
-          margin-bottom: 20px;
-          font-size: 14px;
+          color: #fff;
+          margin-bottom: 15px;
+          font-size: 16px;
+          font-weight: 500;
+          transition: opacity 0.2s;
+        }
+
+        .back:hover {
+          opacity: 0.8;
         }
 
         .title {
           font-size: 28px;
           font-weight: 700;
+          color: #fff;
+          margin-bottom: 6px;
         }
 
         .subtitle {
-          color: #7a7a7a;
+          color: #e0e0e0;
           margin-bottom: 30px;
-        }
-
-        .layout {
-          display: flex;
-          gap: 30px;
-        }
-
-        /* LEFT CARD */
-        .left-card, .summary-card {
-          background: white;
-          padding: 25px;
-          border-radius: 15px;
-          width: 320px;
-          box-shadow: 0px 4px 12px rgba(0,0,0,0.08);
-        }
-
-        .section-title {
-          font-weight: 600;
-          margin-bottom: 20px;
-          display: flex;
-          align-items: center;
-          gap: 8px;
           font-size: 16px;
         }
 
-        .doctor-card {
-          background: #f4f4ff;
-          padding: 15px;
-          border-radius: 12px;
-          margin-bottom: 20px;
-        }
-
-        .doctor-name {
-          font-weight: 600;
-        }
-
-        .item {
-          margin-bottom: 10px;
-        }
-
-        .item span {
-          font-weight: 600;
-        }
-
-        /* SUMMARY BOX */
-        .summary-row {
-          display: flex;
-          justify-content: space-between;
-          margin-bottom: 10px;
-          color: #444;
-        }
-
-        .summary-row.total {
-          font-size: 18px;
-          font-weight: 700;
-          margin-top: 10px;
-        }
-
-        /* RIGHT SIDE */
-        .right-card {
+        .payment-card {
           background: white;
-          padding: 30px;
-          border-radius: 15px;
-          flex: 1;
-          box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
+          border-radius: 20px;
+          box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+          border: 1px solid rgba(255,255,255,0.2);
+          overflow: hidden;
+          max-width: 1000px;
+          margin: 0 auto;
         }
 
-        .input-label {
-          font-size: 14px;
-          margin-bottom: 6px;
-          font-weight: 500;
+        .card-header {
+          background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+          padding: 24px 32px;
+          border-bottom: 1px solid #e2e8f0;
         }
 
-        .input {
-          width: 100%;
-          padding: 12px;
-          border-radius: 8px;
-          border: 1px solid #ddd;
-          margin-bottom: 15px;
-        }
-
-        .split {
+        .header-content {
           display: flex;
-          gap: 10px;
-        }
-
-        .btn-wrapper {
-          margin-top: 20px;
-          display: flex;
-          justify-content: flex-end;
+          align-items: center;
+          justify-content: space-between;
           gap: 20px;
         }
 
+        .appointment-summary {
+          display: flex;
+          align-items: center;
+          gap: 24px;
+          flex: 1;
+        }
+
+        .doctor-info {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+        }
+
+        .doctor-avatar {
+          width: 60px;
+          height: 60px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-weight: 700;
+          font-size: 18px;
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .doctor-details h3 {
+          margin: 0;
+          font-size: 20px;
+          font-weight: 700;
+          color: #1e293b;
+          letter-spacing: -0.025em;
+        }
+
+        .doctor-details p {
+          margin: 4px 0 0;
+          color: #64748b;
+          font-size: 14px;
+          font-weight: 500;
+        }
+
+        .appointment-details {
+          display: flex;
+          gap: 20px;
+          align-items: center;
+        }
+
+        .detail-item {
+          text-align: center;
+          padding: 8px 16px;
+          background: linear-gradient(135deg, #f1f5f9 0%, #ffffff 100%);
+          border-radius: 10px;
+          border: 1px solid #e2e8f0;
+        }
+
+        .detail-label {
+          font-size: 12px;
+          color: #64748b;
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin-bottom: 4px;
+        }
+
+        .detail-value {
+          font-size: 16px;
+          font-weight: 700;
+          color: #1e293b;
+          letter-spacing: -0.025em;
+        }
+
+        .total-amount {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          padding: 16px 24px;
+          border-radius: 12px;
+          text-align: center;
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .total-amount .detail-label {
+          color: rgba(255,255,255,0.9);
+        }
+
+        .total-amount .detail-value {
+          color: white;
+          font-size: 20px;
+        }
+
+        .card-body {
+          padding: 32px;
+        }
+
+        .payment-section {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 32px;
+        }
+
+        .payment-info {
+          flex: 1;
+        }
+
+        .payment-title {
+          font-size: 20px;
+          font-weight: 700;
+          color: #1e293b;
+          margin-bottom: 8px;
+          letter-spacing: -0.025em;
+        }
+
+        .payment-subtitle {
+          color: #64748b;
+          margin-bottom: 24px;
+          font-size: 14px;
+        }
+
+        .secure-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+          color: #155724;
+          padding: 8px 16px;
+          border-radius: 20px;
+          font-size: 14px;
+          font-weight: 500;
+          border: 1px solid #c3e6cb;
+        }
+
+        .payment-actions {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+        }
+
         .cancel-btn {
-          padding: 12px 25px;
-          background: white;
-          border-radius: 8px;
-          border: 1px solid #ddd;
+          padding: 14px 28px;
+          background: #f8fafc;
+          border-radius: 12px;
+          border: 2px solid #e2e8f0;
           cursor: pointer;
+          font-weight: 600;
+          color: #64748b;
+          transition: all 0.3s ease;
+          font-size: 14px;
+        }
+
+        .cancel-btn:hover {
+          background: #edf2f7;
+          border-color: #cbd5e0;
+          transform: translateY(-1px);
         }
 
         .pay-btn {
-          padding: 12px 30px;
-          background: #000;
+          padding: 14px 32px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           color: white;
-          border-radius: 8px;
+          border-radius: 12px;
           cursor: pointer;
           font-weight: 600;
+          border: none;
+          transition: all 0.3s ease;
+          box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+          font-size: 14px;
         }
 
-        .safe-box {
-          margin-top: 20px;
-          background: #eaffea;
-          padding: 15px;
-          border-radius: 10px;
-          color: #187a22;
-          border: 1px solid #b6e8b6;
-          width: 300px;
+        .pay-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        }
+
+        .pay-btn:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+          transform: none;
+        }
+
+        .pay-btn:disabled:hover {
+          transform: none;
+          box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        @media (max-width: 768px) {
+          .payment-wrapper {
+            padding: 15px 20px;
+          }
+
+          .header-content {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
+          }
+
+          .appointment-summary {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
+          }
+
+          .appointment-details {
+            flex-wrap: wrap;
+            gap: 12px;
+          }
+
+          .payment-section {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 24px;
+          }
+
+          .payment-actions {
+            width: 100%;
+            justify-content: space-between;
+          }
         }
       `}</style>
 
@@ -162,81 +357,77 @@ const CompletePayment = () => {
         Secure your appointment by completing the payment
       </div>
 
-      <div className="layout">
-        {/* LEFT SIDE */}
-        <div>
-          <div className="left-card">
-            <div className="section-title">📅 Appointment Details</div>
+      <div className="payment-card">
+        <div className="card-header">
+          <div className="header-content">
+            <div className="appointment-summary">
+              <div className="doctor-info">
+                <div className="doctor-avatar">
+                  {selectedDoctor.name.charAt(0)}
+                </div>
+                <div className="doctor-details">
+                  <h3>Dr. {selectedDoctor.name}</h3>
+                  <p>{selectedDoctor.specialization}</p>
+                </div>
+              </div>
 
-            <div className="doctor-card">
-              <div className="doctor-name">Dr. Michael Brown</div>
-              <div>Dermatologist</div>
+              <div className="appointment-details">
+                <div className="detail-item">
+                  <div className="detail-label">Date</div>
+                  <div className="detail-value">{selectedDate.toLocaleDateString()}</div>
+                </div>
+                <div className="detail-item">
+                  <div className="detail-label">Time</div>
+                  <div className="detail-value">{selectedTime.substring(0, 5)}</div>
+                </div>
+                <div className="detail-item">
+                  <div className="detail-label">Type</div>
+                  <div className="detail-value">{appointmentType}</div>
+                </div>
+                <div className="total-amount">
+                  <div className="detail-label">Total Amount</div>
+                  <div className="detail-value">₹160</div>
+                </div>
+              </div>
             </div>
-
-            <div className="item">
-              <span>Date:</span> Wednesday, December 10, 2025
-            </div>
-            <div className="item">
-              <span>Time:</span> 11:00
-            </div>
-            <div className="item">
-              <span>Type:</span> Consultation
-            </div>
-          </div>
-
-          <div className="summary-card" style={{ marginTop: "20px" }}>
-            <div className="section-title">$ Payment Summary</div>
-
-            <div className="summary-row">
-              <p>Consultation Fee</p>
-              <p>$150</p>
-            </div>
-            <div className="summary-row">
-              <p>Service Fee</p>
-              <p>$10</p>
-            </div>
-
-            <div className="summary-row total">
-              <p>Total Amount</p>
-              <p>$160</p>
-            </div>
-          </div>
-
-          <div className="safe-box">
-            <strong>Secure Payment</strong>
-            <br />
-            Your payment information is encrypted and secure.
           </div>
         </div>
 
-        {/* RIGHT SIDE */}
-        <div className="right-card">
-          <div className="section-title">💳 Payment Information</div>
-
-          <div className="input-label">Payment Method</div>
-          <input className="input" value="Credit/Debit Card" readOnly />
-
-          <div className="input-label">Cardholder Name</div>
-          <input className="input" placeholder="John Doe" />
-
-          <div className="input-label">Card Number</div>
-          <input className="input" placeholder="1234 5678 9012 3456" />
-
-          <div className="split">
-            <div style={{ flex: 1 }}>
-              <div className="input-label">Expiry Date</div>
-              <input className="input" placeholder="MM/YY" />
+        <div className="card-body">
+          <div className="payment-section">
+            <div className="payment-info">
+              <h2 className="payment-title">Payment Details</h2>
+              <p className="payment-subtitle">
+                {appointmentId 
+                  ? `Complete your payment to confirm appointment #${appointmentId} (${status})`
+                  : "Complete your secure payment to confirm the appointment"
+                }
+              </p>
+              <div className="secure-badge">
+                🔒 Secure Payment
+              </div>
+              {appointmentId && (
+                <div style={{ marginTop: '16px', padding: '12px', background: 'linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%)', borderRadius: '8px', border: '1px solid #c3e6cb' }}>
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#155724', marginBottom: '4px' }}>
+                    Appointment Status: {status}
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#155724' }}>
+                    Appointment ID: {appointmentId}
+                  </div>
+                </div>
+              )}
             </div>
 
-            <div style={{ flex: 1 }}>
-              <div className="input-label">CVV</div>
-              <input className="input" placeholder="123" />
+            <div className="payment-actions">
+              <button className="cancel-btn" onClick={() => navigate("/patient/appointments")}>Cancel</button>
+              <button 
+                className="pay-btn" 
+                onClick={handlePayment}
+                disabled={isProcessing}
+              >
+                {isProcessing ? "Processing..." : "Pay Now ₹160"}
+              </button>
             </div>
-          </div>
-
-          <div className="btn-wrapper">
-            <button className="cancel-btn">Cancel</button>
-            <button className="pay-btn">Pay $160</button>
           </div>
         </div>
       </div>

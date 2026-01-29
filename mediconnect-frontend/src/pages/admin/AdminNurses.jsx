@@ -29,7 +29,7 @@ export default function NurseManagement() {
     active: true,
   });
 
-  /* ---------------- FETCH NURSES ---------------- */
+  
   useEffect(() => {
     const fetchNurses = async () => {
       try {

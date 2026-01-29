@@ -7,26 +7,41 @@ const DEMO_USERS = {
         email: "patient@demo.com",
         password: "demo123",
         role: "PATIENT",
-        name: "John Patient"
+        name: "John Patient",
+        id: 1  // patientId for demo
     },
     doctor: {
         email: "doctor@demo.com",
         password: "demo123",
         role: "DOCTOR",
-        name: "Dr. Smith"
+        name: "Dr. Smith",
+        id: 1  // doctorId for demo
     },
     admin: {
         email: "admin@demo.com",
         password: "demo123",
         role: "ADMIN",
-        name: "Admin User"
+        name: "Admin User",
+        id: 1  // adminId for demo
     }
 };
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(() => {
         const saved = localStorage.getItem("user");
-        return saved ? JSON.parse(saved) : null;
+        if (saved) {
+            const parsedUser = JSON.parse(saved);
+            // Migrate existing users to include id if missing
+            if (!parsedUser.id) {
+                const role = parsedUser.role?.toLowerCase();
+                if (role && DEMO_USERS[role]) {
+                    parsedUser.id = DEMO_USERS[role].id;
+                    localStorage.setItem("user", JSON.stringify(parsedUser));
+                }
+            }
+            return parsedUser;
+        }
+        return null;
     });
 
     const login = (role, email, password) => {
@@ -36,6 +51,7 @@ export const AuthProvider = ({ children }) => {
         if (demo.email !== email || demo.password !== password) return false;
 
         const userData = {
+            id: demo.id,
             name: demo.name,
             email: demo.email,
             role: demo.role
