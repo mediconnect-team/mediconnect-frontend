@@ -110,7 +110,7 @@ export async function getDoctorsConsultedCount(patientId) {
  */
 export async function getAllDoctors() {
     try {
-        const response = await api.get('/doctor');
+        const response = await api.get('/patient/allDoctors');
         return response.data;
     } catch (error) {
         console.error("Error fetching all doctors:", error);
@@ -246,7 +246,7 @@ export async function getPatientDashboard(patientId) {
  */
 export async function getAvailableSlots(params) {
     try {
-        const response = await api.post('/appointments/slot', params );
+        const response = await api.get('/appointments/slots', { params });
         return response.data;
     } catch (error) {
         console.error("Error fetching available slots:", error);
@@ -318,44 +318,7 @@ export async function updatePatientProfile(patientId, profileData) {
         throw error;
     }
 }
-export async function holdSlot(holdSlotData) {
-    try {
-        const response = await api.post('/appointments/holdSlot', holdSlotData);
-        return response.data;
-    } catch (error) {
-        console.error("Error holding appointment slot:", error);
-        throw error;
-    }
-}
 
-export async function createPaymentIntent(paymentData) {
-    try {
-        const response = await api.post('/billing/create-order', paymentData);
-
-        return response.data;
-    } catch (error) {
-        console.error("Error creating payment intent:", error);
-        throw error;
-    }
-}
-
-
-
-export async function verifyPayment(paymentData) {
-  try {
-    const response = await api.post("/billing/verify-order", {
-      razorpay_order_id: paymentData.razorpay_order_id,
-      razorpay_payment_id: paymentData.razorpay_payment_id,
-      razorpay_signature: paymentData.razorpay_signature,
-      appointmentId: paymentData.appointmentId
-    });
-
-    return response.data; // true / false
-  } catch (error) {
-    console.error("Verify payment failed:", error);
-    throw error;
-  }
-}
 export default {
     getUpcomingAppointments,
     getMedicalRecords,

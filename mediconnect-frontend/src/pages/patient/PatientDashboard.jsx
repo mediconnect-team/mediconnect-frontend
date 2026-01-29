@@ -13,9 +13,20 @@ import {
     getMedicalRecords 
 } from "../../services/patientApi";
 import useAuth from "../../hooks/useAuth";
-import { getToken } from "../../services/api";
 
-
+/**
+ * Patient Dashboard Component
+ * 
+ * Displays an overview of the patient's health information including:
+ * - Statistics (appointments, records, prescriptions)
+ * - Upcoming appointments
+ * - Recent reports
+ * - Quick action buttons
+ * 
+ * Uses the patientId from auth context for all API calls.
+ * 
+ * @author MediConnect Team
+ */
 export default function PatientDashboard() {
     const navigate = useNavigate();
     const { user, patientId } = useAuth();
@@ -70,14 +81,13 @@ export default function PatientDashboard() {
             setLoading(false);
         }
     }, [patientId]);
- 
-    const token = getToken();
+
     useEffect(() => {
         if(!token){
             return;;
         }
         fetchDashboardData();
-    }, [token,fetchDashboardData]);
+    }, [fetchDashboardData]);
 
     /**
      * Format date for display

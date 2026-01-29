@@ -66,7 +66,17 @@ export const AuthProvider = ({ children }) => {
         }
     }, [dispatch, isInitialized]);
 
+
     
+
+    /**
+     * Login user with email and password
+     * 
+     * @param {string} email - User's email address
+     * @param {string} password - User's password
+     * @returns {Promise<{success: boolean, error?: string}>} Login result
+     */
+
     const login = useCallback(async (email, password) => {
         try {
             const result = await dispatch(loginAction({ email, password })).unwrap();
@@ -76,7 +86,12 @@ export const AuthProvider = ({ children }) => {
         }
     }, [dispatch]);
 
-    
+    /**
+     * Register a new patient
+     * 
+     * @param {object} patientData - Patient registration data
+     * @returns {Promise<{success: boolean, error?: string}>} Registration result
+     */
     const registerPatient = useCallback(async (patientData) => {
         try {
             const result = await dispatch(registerAction(patientData)).unwrap();
@@ -86,17 +101,26 @@ export const AuthProvider = ({ children }) => {
         }
     }, [dispatch]);
 
-    
+    /**
+     * Logout user
+     * Clears all authentication data
+     */
     const logout = useCallback(() => {
         dispatch(logoutAction());
     }, [dispatch]);
 
-    
+    /**
+     * Clear authentication error
+     */
     const clearAuthError = useCallback(() => {
         dispatch(clearError());
     }, [dispatch]);
 
-    
+    /**
+     * Get role-specific ID based on user role
+     * 
+     * @returns {number|null} The appropriate ID for the user's role
+     */
     const getRoleSpecificId = useCallback(() => {
         if (!user) return null;
         
@@ -112,7 +136,12 @@ export const AuthProvider = ({ children }) => {
         }
     }, [user, patientId, doctorId, adminId, userId]);
 
-    
+    /**
+     * Check if user has a specific role
+     * 
+     * @param {string} checkRole - Role to check (e.g., 'PATIENT', 'DOCTOR', 'ADMIN')
+     * @returns {boolean} True if user has the specified role
+     */
     const hasRole = useCallback((checkRole) => {
         if (!user) return false;
         
@@ -158,7 +187,12 @@ export const AuthProvider = ({ children }) => {
     );
 };
 
-
+/**
+ * Hook to access authentication context
+ * 
+ * @returns {object} Authentication context value
+ * @throws {Error} If used outside of AuthProvider
+ */
 export const useAuthContext = () => {
     const context = useContext(AuthContext);
     
