@@ -2,41 +2,51 @@ import React, { useEffect, useState } from 'react';
 import { Calendar, CheckCircle, Stethoscope, Plus } from 'lucide-react';
 import './MyAppointment.css';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { NumberOfCompletedAppointments, TotalNumberOfDoctorsConsulted, getAllDoctors } from '../../services/patientApi';
+import { getCompletedAppointmentsCount, getDoctorsConsultedCount, getAllDoctors } from '../../services/patientApi';
+import useAuth from '../../hooks/useAuth';
 
 const MyAppointment = () => {
+  const { patientId } = useAuth();
   const [activeTab, setActiveTab] = useState('upcoming');
-   const [TotalDoctorsConsulted, setTotalDoctorsConsulted] = useState(0);
-    const [CompletedAppointments, setCompletedAppointments] = useState(0);
-    const [doctors, setDoctors] = useState([]);
+  const [totalDoctorsConsulted, setTotalDoctorsConsulted] = useState(0);
+  const [completedAppointments, setCompletedAppointments] = useState(0);
+  const [doctors, setDoctors] = useState([]);
 
-    const getDoctors = async ()=>{
-        const data = await getAllDoctors();
-        if(data){
-          console.log("doctors data",data);
-          setDoctors(data);
-        }
+  const fetchDoctors = async () => {
+    try {
+      const data = await getAllDoctors();
+      if (data) {
+        setDoctors(data);
+      }
+    } catch (error) {
+      console.error("Error fetching doctors:", error);
     }
+  };
 
-    const fetchAppointmentsData = async () => {
-            const completedAppointments = await NumberOfCompletedAppointments();
-            const totalDoctors = await TotalNumberOfDoctorsConsulted();
-         
-            if (completedAppointments) {
-              console.log("completedAppointments",completedAppointments);
-                setCompletedAppointments(completedAppointments);
-            }   
-            if (totalDoctors) {
-              console.log("totalDoctors",totalDoctors); 
-                setTotalDoctorsConsulted(totalDoctors);
-            }
+  const fetchAppointmentsData = async () => {
+    if (!patientId) return;
     
-        }
+    try {
+      const [completedCount, doctorsCount] = await Promise.allSettled([
+        getCompletedAppointmentsCount(patientId),
+        getDoctorsConsultedCount(patientId)
+      ]);
+      
+      if (completedCount.status === 'fulfilled' && completedCount.value) {
+        setCompletedAppointments(completedCount.value);
+      }
+      if (doctorsCount.status === 'fulfilled' && doctorsCount.value) {
+        setTotalDoctorsConsulted(doctorsCount.value);
+      }
+    } catch (error) {
+      console.error("Error fetching appointment data:", error);
+    }
+  };
 
-      useEffect(() => {
-        fetchAppointmentsData();
-        getDoctors();
-      }, []);
+  useEffect(() => {
+    fetchAppointmentsData();
+    fetchDoctors();
+  }, [patientId]);
 
   const navigate = useNavigate();
 

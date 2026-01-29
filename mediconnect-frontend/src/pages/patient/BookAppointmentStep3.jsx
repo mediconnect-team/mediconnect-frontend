@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, ArrowLeft, ArrowRight, Clock } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getAvailableSlots } from '../../services/patientApi';
+import { getToken } from '../../services/api';
 
 const BookAppointmentStep3 = () => {
   const [selectedTime, setSelectedTime] = useState('11:00');
@@ -12,38 +13,36 @@ const BookAppointmentStep3 = () => {
   const location = useLocation();
   const { selectedDoctor, selectedDate } = location.state || {};
 
-  if (!selectedDoctor || !selectedDate) {
-    navigate("/patient/appointments");
-    return null;
-  }
+  // if (!selectedDoctor || !selectedDate) {
+  //   navigate("/patient/appointments");
+  //   return null;
+  // }
 
   useEffect(() => {
+    console.log("enter");
+
+    const token = getToken();
+    if (!token || !selectedDoctor || !selectedDate) return;
+    console.log(token);
     const fetchSlots = async () => {
       setLoadingSlots(true);
-      const dateStr = selectedDate.toISOString().split('T')[0]; // YYYY-MM-DD
-      const response = await getAvailableSlots(selectedDoctor.doctorId, dateStr);
+      const dateStr = selectedDate.toLocaleDateString('en-CA');
+     const params = {
+  doctorId: selectedDoctor.doctorId,
+  date: dateStr
+};
+console.log(selectedDoctor);
+console.log("Params:", params);
+      const response = await getAvailableSlots(params);
+      console.log("Fetched slots:", response);
       if (response) {
         setSlots(response);
       }
       setLoadingSlots(false);
     };
     fetchSlots();
-  }, [selectedDoctor.doctorId, selectedDate]);
+  }, [selectedDoctor, selectedDate]);
 
-  const timeSlots = [
-    { time: '09:00', available: true },
-    { time: '09:30', available: true },
-    { time: '10:00', available: false },
-    { time: '10:30', available: true },
-    { time: '11:00', available: true },
-    { time: '11:30', available: false },
-    { time: '14:00', available: true },
-    { time: '14:30', available: true },
-    { time: '15:00', available: true },
-    { time: '15:30', available: false },
-    { time: '16:00', available: true },
-    { time: '16:30', available: true }
-  ];
 
   return (
     <div style={styles.overlay}>

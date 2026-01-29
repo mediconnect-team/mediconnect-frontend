@@ -1,77 +1,170 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useCallback } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+    login as loginAction,
+    logout as logoutAction,
+    register as registerAction,
+    initializeAuth,
+    clearError,
+    selectUser,
+    selectIsAuthenticated,
+    selectIsLoading,
+    selectError,
+    selectIsInitialized,
+    selectPatientId,
+    selectDoctorId,
+    selectAdminId,
+    selectUserRole,
+    selectUserId,
+} from "../store/slices/authSlice";
+
+/**
+ * Authentication Context
+ * 
+ * Provides authentication functionality throughout the application.
+ * Works in conjunction with Redux for state management while providing
+ * a clean, intuitive API through React Context.
+ * 
+ * Industry Standard Implementation:
+ * - Context + Redux hybrid pattern for best of both worlds
+ * - Context provides easy-to-use hooks
+ * - Redux manages the actual state with middleware support
+ * - Automatic auth initialization on app load
+ * 
+ * Usage:
+ * const { user, login, logout, isLoading, error } = useAuthContext();
+ * 
+ * @author MediConnect Team
+ */
 
 const AuthContext = createContext();
 
-const DEMO_USERS = {
-    patient: {
-        email: "patient@demo.com",
-        password: "demo123",
-        role: "PATIENT",
-        name: "John Patient",
-        id: 1  // patientId for demo
-    },
-    doctor: {
-        email: "doctor@demo.com",
-        password: "demo123",
-        role: "DOCTOR",
-        name: "Dr. Smith",
-        id: 1  // doctorId for demo
-    },
-    admin: {
-        email: "admin@demo.com",
-        password: "demo123",
-        role: "ADMIN",
-        name: "Admin User",
-        id: 1  // adminId for demo
-    }
-};
-
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(() => {
-        const saved = localStorage.getItem("user");
-        if (saved) {
-            const parsedUser = JSON.parse(saved);
-            // Migrate existing users to include id if missing
-            if (!parsedUser.id) {
-                const role = parsedUser.role?.toLowerCase();
-                if (role && DEMO_USERS[role]) {
-                    parsedUser.id = DEMO_USERS[role].id;
-                    localStorage.setItem("user", JSON.stringify(parsedUser));
-                }
-            }
-            return parsedUser;
+    const dispatch = useDispatch();
+    
+    // Select state from Redux store
+    const user = useSelector(selectUser);
+    const isAuthenticated = useSelector(selectIsAuthenticated);
+    const isLoading = useSelector(selectIsLoading);
+    const error = useSelector(selectError);
+    const isInitialized = useSelector(selectIsInitialized);
+    
+    // Role-specific IDs
+    const userId = useSelector(selectUserId);
+    const patientId = useSelector(selectPatientId);
+    const doctorId = useSelector(selectDoctorId);
+    const adminId = useSelector(selectAdminId);
+    const role = useSelector(selectUserRole);
+
+    /**
+     * Initialize authentication on app load
+     * Checks if user has a valid token and refreshes user data
+     */
+    useEffect(() => {
+        if (!isInitialized) {
+            dispatch(initializeAuth());
         }
-        return null;
-    });
+    }, [dispatch, isInitialized]);
 
-    const login = (role, email, password) => {
-        const demo = DEMO_USERS[role];
+    
+    const login = useCallback(async (email, password) => {
+        try {
+            const result = await dispatch(loginAction({ email, password })).unwrap();
+            return { success: true, user: result };
+        } catch (error) {
+            return { success: false, error };
+        }
+    }, [dispatch]);
 
-        if (!demo) return false;
-        if (demo.email !== email || demo.password !== password) return false;
+    
+    const registerPatient = useCallback(async (patientData) => {
+        try {
+            const result = await dispatch(registerAction(patientData)).unwrap();
+            return { success: true, message: result.message };
+        } catch (error) {
+            return { success: false, error };
+        }
+    }, [dispatch]);
 
-        const userData = {
-            id: demo.id,
-            name: demo.name,
-            email: demo.email,
-            role: demo.role
-        };
+    
+    const logout = useCallback(() => {
+        dispatch(logoutAction());
+    }, [dispatch]);
 
-        localStorage.setItem("user", JSON.stringify(userData));
-        setUser(userData);
-        return true;
-    };
+    
+    const clearAuthError = useCallback(() => {
+        dispatch(clearError());
+    }, [dispatch]);
 
-    const logout = () => {
-        localStorage.removeItem("user");
-        setUser(null);
+    
+    const getRoleSpecificId = useCallback(() => {
+        if (!user) return null;
+        
+        switch (user.role) {
+            case 'ROLE_PATIENT':
+                return patientId;
+            case 'ROLE_DOCTOR':
+                return doctorId;
+            case 'ROLE_ADMIN':
+                return adminId;
+            default:
+                return userId;
+        }
+    }, [user, patientId, doctorId, adminId, userId]);
+
+    
+    const hasRole = useCallback((checkRole) => {
+        if (!user) return false;
+        
+        // Handle both 'PATIENT' and 'ROLE_PATIENT' formats
+        const normalizedCheckRole = checkRole.startsWith('ROLE_') 
+            ? checkRole 
+            : `ROLE_${checkRole}`;
+        
+        return user.role === normalizedCheckRole;
+    }, [user]);
+
+    // Context value - all authentication-related data and functions
+    const value = {
+        // User data
+        user,
+        userId,
+        patientId,
+        doctorId,
+        adminId,
+        role,
+        
+        // Authentication status
+        isAuthenticated,
+        isLoading,
+        isInitialized,
+        error,
+        
+        // Actions
+        login,
+        logout,
+        registerPatient,
+        clearAuthError,
+        
+        // Utility functions
+        getRoleSpecificId,
+        hasRole,
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout }}>
+        <AuthContext.Provider value={value}>
             {children}
         </AuthContext.Provider>
     );
 };
 
-export const useAuthContext = () => useContext(AuthContext);
+
+export const useAuthContext = () => {
+    const context = useContext(AuthContext);
+    
+    if (!context) {
+        throw new Error('useAuthContext must be used within an AuthProvider');
+    }
+    
+    return context;
+};

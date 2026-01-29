@@ -2,12 +2,12 @@ import React, { useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate, useLocation } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
-import { holdSlot } from '../../services/patientApi';
-
+import { createPaymentIntent, holdSlot } from '../../services/patientApi';
+import { verifyPayment } from '../../services/patientApi';
 const CompletePayment = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
+  const { patientId } = useAuth();
   const { selectedDoctor, selectedDate, selectedTime, appointmentType, notes, appointmentId, status } = location.state || {};
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -17,19 +17,27 @@ const CompletePayment = () => {
   }
 
   const handlePayment = async () => {
-    if (!user?.id) {
-      alert("User not authenticated. Please login again.");
+    const loadRazorpay = () => {
+  return new Promise((resolve) => {
+    if (window.Razorpay) {
+      resolve(true);
       return;
     }
+
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
+
+    
 
     setIsProcessing(true);
     try {
       // If appointment is already booked (from step 4), just proceed with payment
-      if (appointmentId) {
-        alert(`Payment successful! Your appointment (ID: ${appointmentId}) is confirmed.`);
-        navigate("/patient/dashboard");
-        return;
-      }
+      
 
       // Fallback: Book appointment if not already booked (old flow)
       const startTimeStr = selectedTime.length === 5 ? `${selectedTime}:00` : selectedTime;
@@ -42,21 +50,58 @@ const CompletePayment = () => {
 
       const holdSlotData = {
         doctorId: selectedDoctor.doctorId,
-        patientId: user.id,
-        date: selectedDate.toISOString().split('T')[0],
+        patientId: patientId,
+        date: selectedDate.toLocaleDateString('en-CA'),
+        amount:160,
         startTime: startTimeStr,
         endTime: endTimeStr,
-        appointmentType: appointmentType
+        purpose : appointmentType,
+        appointmentId: appointmentId || null,
       };
 
-      const response = await holdSlot(holdSlotData);
+      console.log("Hold Slot Data:", holdSlotData);
+
       
-      if (response && response.appointmentId) {
-        alert(`Appointment booked and payment successful! Appointment ID: ${response.appointmentId}`);
-        navigate("/patient/dashboard");
-      } else {
-        alert("Failed to complete booking. Please try again.");
+      const order = await createPaymentIntent(holdSlotData);
+      console.log("Payment Intent Response:", order);
+
+      // const { order, appointmentId: newAppointmentId } = response;
+      const res = await loadRazorpay();
+    if (!res) {
+      alert("Razorpay SDK failed to load");
+      return;
+    }
+
+
+    const options = {
+      key: "rzp_test_S9dNhbDJlTqrwH", 
+      amount: order.amount,
+      currency: order.currency,
+      order_id: order.orderId,
+      name: "Doctor Appointment",
+      description: "Consultation Fee",
+
+      handler: async function (response) {
+        await verifyPayment({
+          razorpay_order_id: response.razorpay_order_id,
+          razorpay_payment_id: response.razorpay_payment_id,
+          razorpay_signature: response.razorpay_signature,
+          appointmentId
+        });
+
+        alert("Payment successful 🎉");
+        navigate("/patient/appointments");
+      },
+
+      theme: {
+        color: "#3399cc"
       }
+    };
+
+    const razorpay = new window.Razorpay(options);
+    razorpay.open();
+      
+      
     } catch (error) {
       console.error("Error processing payment:", error);
       alert("Failed to process payment. Please try again.");
@@ -386,7 +431,7 @@ const CompletePayment = () => {
                 </div>
                 <div className="total-amount">
                   <div className="detail-label">Total Amount</div>
-                  <div className="detail-value">₹160</div>
+                  <div className="detail-value">₹1500</div>
                 </div>
               </div>
             </div>
@@ -425,7 +470,7 @@ const CompletePayment = () => {
                 onClick={handlePayment}
                 disabled={isProcessing}
               >
-                {isProcessing ? "Processing..." : "Pay Now ₹160"}
+                {isProcessing ? "Processing..." : "Pay Now ₹1500"}
               </button>
             </div>
           </div>

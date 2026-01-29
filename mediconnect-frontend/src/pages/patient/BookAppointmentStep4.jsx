@@ -11,8 +11,13 @@ const BookAppointmentStep4 = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
+       
+  const { user, patientId } = useAuth();
   const { selectedDoctor, selectedDate, selectedTime } = location.state || {};
+
+  console.log("Selected Doctor:", selectedDoctor);
+  console.log("Selected Date:", selectedDate);
+  console.log("Selected Time:", selectedTime);
 
   if (!selectedDoctor || !selectedDate || !selectedTime) {
     navigate("/patient/appointments");
@@ -27,10 +32,7 @@ const BookAppointmentStep4 = () => {
   ];
 
   const handleConfirmBooking = async () => {
-    if (!user?.id) {
-      alert("Patient ID not found. Please log out and log back in to refresh your session.");
-      return;
-    }
+   
 
     setIsProcessing(true);
     try {
@@ -46,15 +48,15 @@ const BookAppointmentStep4 = () => {
 
       const holdSlotData = {
         doctorId: selectedDoctor.doctorId,
-        patientId: user.id,
-        date: selectedDate.toISOString().split('T')[0], // Convert to YYYY-MM-DD format
+        patientId: patientId,
+        date: selectedDate.toLocaleDateString('en-CA'), // Convert to YYYY-MM-DD format
         startTime: startTimeStr,
         endTime: endTimeStr,
         appointmentType: appointmentType
       };
 
       const response = await holdSlot(holdSlotData);
-      
+      console.log("Hold Slot Response:", response);
       if (response && response.appointmentId) {
         // Success - navigate to payment page with appointment data
         navigate("/patient/payments", { 
@@ -78,6 +80,7 @@ const BookAppointmentStep4 = () => {
       setIsProcessing(false);
     }
   };
+ 
 
   return (
     <div style={styles.overlay}>
