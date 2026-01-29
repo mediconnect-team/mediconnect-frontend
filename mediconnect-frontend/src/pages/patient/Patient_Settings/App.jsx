@@ -1,25 +1,21 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Settings from "./Settings";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import SettingsLayout from "./SettingsLayout";
 import Notification from "./Notification";
-import Security from "./Security";
-import System from "./System";
 import Appearance from "./Appearance";
+import EditProfile from "./EditProfile";
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/settings" element={<Settings />}>
-          <Route index element={<div />} />
+        <Route path="/" element={<Navigate to="/settings/notification" />} />
 
-          <Route path="general" element={<div />} />
+        <Route path="/settings" element={<SettingsLayout />}>
+          <Route index element={<Navigate to="notification" />} />
           <Route path="notification" element={<Notification />} />
-          <Route path="security" element={<Security />} />
-          <Route path="system" element={<System />} />
           <Route path="appearance" element={<Appearance />} />
+          <Route path="edit" element={<EditProfile />} />
         </Route>
-
-        <Route path="/" element={<Settings />} />
       </Routes>
     </Router>
   );
