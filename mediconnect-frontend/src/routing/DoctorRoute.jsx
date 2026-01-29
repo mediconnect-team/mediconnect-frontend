@@ -1,13 +1,38 @@
-import React from 'react'
 import { Navigate, Outlet } from 'react-router-dom';
 import useAuth from './../hooks/useAuth';
 import DoctorLayout from './../components/layout/DoctorLayout';
 
+/**
+ * Doctor Protected Route
+ * 
+ * Ensures only authenticated doctors can access doctor routes.
+ * Redirects to login if not authenticated or unauthorized.
+ * 
+ * @author MediConnect Team
+ */
 function DoctorRoute() {
-    const { user } = useAuth();
+    const { user, isAuthenticated, isInitialized, isLoading, hasRole } = useAuth();
 
-    if (!user) return <Navigate to="/login" replace />;
-    if (user.role !== "DOCTOR") return <Navigate to="/login" replace />;
+    // Show loading while checking authentication
+    if (!isInitialized || isLoading) {
+        return (
+            <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
+                <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        );
+    }
+
+    // Redirect to login if not authenticated
+    if (!isAuthenticated || !user) {
+        return <Navigate to="/login" replace />;
+    }
+
+    // Check if user has doctor role (handles both 'DOCTOR' and 'ROLE_DOCTOR')
+    if (!hasRole('DOCTOR')) {
+        return <Navigate to="/login" replace />;
+    }
 
     return (
         <DoctorLayout>
@@ -16,4 +41,4 @@ function DoctorRoute() {
     );
 }
 
-export default DoctorRoute
+export default DoctorRoute;

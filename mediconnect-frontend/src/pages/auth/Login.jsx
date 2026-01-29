@@ -1,28 +1,95 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
+import { toast } from "react-toastify";
 
+/**
+ * Login Component
+ * 
+ * Handles user authentication for all roles (Patient, Doctor, Admin).
+ * Integrates with the backend authentication API and redirects users
+ * to their role-specific dashboards upon successful login.
+ * 
+ * Features:
+ * - Role selection (Patient, Doctor, Admin)
+ * - Form validation
+ * - Error handling with user-friendly messages
+ * - Loading state during authentication
+ * - Automatic redirect for authenticated users
+ * 
+ * @author MediConnect Team
+ */
 export default function Login() {
-    const { login } = useAuth();
+    const { login, isAuthenticated, isLoading, error, clearAuthError, user } = useAuth();
     const navigate = useNavigate();
 
-    const [role, setRole] = useState("Patient");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
+    const [localError, setLocalError] = useState("");
 
-    const handleSubmit = (e) => {
+    // Redirect authenticated users to their dashboard
+    useEffect(() => {
+        if (isAuthenticated && user) {
+            const rolePath = getRolePath(user.role);
+            navigate(`/${rolePath}/dashboard`, { replace: true });
+        }
+    }, [isAuthenticated, user, navigate]);
+
+    // Clear errors when component mounts
+    useEffect(() => {
+        clearAuthError();
+        setLocalError("");
+    }, [clearAuthError]);
+
+    /**
+     * Get route path based on user role
+     */
+    const getRolePath = (role) => {
+        switch (role) {
+            case 'ROLE_PATIENT':
+                return 'patient';
+            case 'ROLE_DOCTOR':
+                return 'doctor';
+            case 'ROLE_ADMIN':
+                return 'admin';
+            default:
+                return 'patient';
+        }
+    };
+
+    /**
+     * Handle form submission
+     */
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        setLocalError("");
 
-        const success = login(role.toLowerCase(), email, password);
-
-        if (!success) {
-            setError("Invalid credentials");
+        // Basic validation
+        if (!email.trim()) {
+            setLocalError("Please enter your email address");
             return;
         }
 
-        navigate(`/${role.toLowerCase()}/dashboard`);
+        if (!password.trim()) {
+            setLocalError("Please enter your password");
+            return;
+        }
+
+        // Attempt login
+        const result = await login(email, password);
+
+        if (result.success) {
+            toast.success(`Welcome back, ${result.user.name}!`);
+            const rolePath = getRolePath(result.user.role);
+            navigate(`/${rolePath}/dashboard`, { replace: true });
+        } else {
+            setLocalError(result.error || "Login failed. Please try again.");
+            toast.error(result.error || "Login failed");
+        }
     };
+
+    // Display error message (local or from Redux)
+    const displayError = localError || error;
 
     return (
         <div
@@ -39,29 +106,21 @@ export default function Login() {
                         className="bi bi-heart-pulse"
                         style={{ fontSize: "3rem", color: "#121212" }}
                     ></i>
-
                 </div>
 
                 {/* Title */}
                 <h3 className="text-center fw-bold mb-4">MedCare HMS Login</h3>
 
+                {/* Error Alert */}
+                {displayError && (
+                    <div className="alert alert-danger d-flex align-items-center" role="alert">
+                        <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                        <div>{displayError}</div>
+                    </div>
+                )}
+
                 {/* Form */}
-                {error && <div className="alert alert-danger">{error}</div>}
-
                 <form onSubmit={handleSubmit}>
-                    {/* Role Select */}
-                    <label className="fw-semibold mb-1">Login as</label>
-                    <select
-                        className="form-select mb-3"
-                        value={role}
-                        onChange={(e) => setRole(e.target.value)}
-                        style={{ padding: "10px", borderRadius: "10px" }}
-                    >
-                        <option>Patient</option>
-                        <option>Doctor</option>
-                        <option>Admin</option>
-                    </select>
-
                     {/* Email */}
                     <label className="fw-semibold mb-1">Email Address</label>
                     <input
@@ -70,6 +129,7 @@ export default function Login() {
                         placeholder="Enter email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        disabled={isLoading}
                         required
                         style={{ padding: "10px", borderRadius: "10px" }}
                     />
@@ -82,15 +142,33 @@ export default function Login() {
                         placeholder="Enter password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        disabled={isLoading}
                         required
                         style={{ padding: "10px", borderRadius: "10px" }}
                     />
 
                     {/* Sign In Button */}
-                    <button className="btn btn-dark w-100 py-2" style={{ borderRadius: "10px" }}>
-                        Sign In
+                    <button 
+                        className="btn btn-dark w-100 py-2" 
+                        style={{ borderRadius: "10px" }}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? (
+                            <>
+                                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                Signing In...
+                            </>
+                        ) : (
+                            'Sign In'
+                        )}
                     </button>
                 </form>
+
+                {/* Info text */}
+                <div className="text-center mt-3 text-muted small">
+                    <i className="bi bi-info-circle me-1"></i>
+                    Your dashboard will be shown based on your account role
+                </div>
 
                 {/* Register Link */}
                 <div className="text-center mt-3">
@@ -101,6 +179,7 @@ export default function Login() {
                         className="btn btn-outline-primary mt-2"
                         style={{ borderRadius: "10px", width: "120px" }}
                         onClick={() => navigate("/register")}
+                        disabled={isLoading}
                     >
                         Register
                     </button>

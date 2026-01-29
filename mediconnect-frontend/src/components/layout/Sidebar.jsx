@@ -49,7 +49,14 @@ export default function Sidebar({ collapsed, toggleCollapse }) {
 
     };
 
-    const activeMenu = menus[user.role];
+    // Get menu based on role (handles both 'PATIENT' and 'ROLE_PATIENT' formats)
+    const getRoleKey = () => {
+        if (!user?.role) return null;
+        // Remove 'ROLE_' prefix if present
+        return user.role.replace('ROLE_', '');
+    };
+    
+    const activeMenu = menus[getRoleKey()] || [];
 
     // PROFILE DROPDOWN
     const [showProfileMenu, setShowProfileMenu] = useState(false);

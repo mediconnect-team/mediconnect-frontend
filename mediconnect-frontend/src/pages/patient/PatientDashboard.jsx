@@ -1,188 +1,288 @@
+import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { Spinner, Alert } from "react-bootstrap";
 import PageTitle from "../../components/common/PageTitle";
 import StatCard from "../../components/patient/StatCard";
 import AppointmentCard from "../../components/patient/AppointmentCard";
 import ReportCard from "../../components/patient/ReportCard";
 import QuickActionCard from './../../components/patient/QuickAction';
-import { getAllDoctors, getUpcomingAppointments , getActivePrescriptions,NumberOfCompletedAppointments,TotalNumberOfDoctorsConsulted,getDoctorsByBranch,getRecentReports,getMedicalRecords } from "../../services/patientApi";
-import { useState,useEffect  } from "react";
+import { 
+    getUpcomingAppointments, 
+    getActivePrescriptions, 
+    getRecentReports, 
+    getMedicalRecords 
+} from "../../services/patientApi";
+import useAuth from "../../hooks/useAuth";
 
+/**
+ * Patient Dashboard Component
+ * 
+ * Displays an overview of the patient's health information including:
+ * - Statistics (appointments, records, prescriptions)
+ * - Upcoming appointments
+ * - Recent reports
+ * - Quick action buttons
+ * 
+ * Uses the patientId from auth context for all API calls.
+ * 
+ * @author MediConnect Team
+ */
 export default function PatientDashboard() {
-    const [UpcomingAppointments, setUpcomingAppointments] = useState([]);
-    const [MedicalRecords, setMedicalRecords] = useState([]);
-    const [ActivePrescriptions, setActivePrescriptions] = useState(0);
-    const [RecentReports, setRecentReports] = useState([]);
+    const navigate = useNavigate();
+    const { user, patientId } = useAuth();
     
-
-    const fetchUpcomingAppointments = async () => {
-        // Fetch upcoming appointments from API
-        const data = await getUpcomingAppointments();
-        if (data) {
-            setUpcomingAppointments(data);
-        }
-    }
-
-    const fetchRecentReports = async () => {    
-        // Fetch recent reports from API
-        const data = await getRecentReports();  
-        if (data) {
-            setRecentReports(data);
-        }   
-    }
-    const fetchMedicalRecords = async () => {    
-        // Fetch medical records from API
-        const data = await getMedicalRecords();
-        if (data) {
-            setMedicalRecords(data);
-        }
-    }
+    // State for dashboard data
+    const [upcomingAppointments, setUpcomingAppointments] = useState([]);
+    const [medicalRecords, setMedicalRecords] = useState([]);
+    const [activePrescriptions, setActivePrescriptions] = useState([]);
+    const [recentReports, setRecentReports] = useState([]);
     
-    const fetchDashboardData = async () => {
-       
-        const activePrescriptions = await getActivePrescriptions();
-       
+    // Loading and error states
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-        if (activePrescriptions) {
-            setActivePrescriptions(activePrescriptions);
+    /**
+     * Fetch all dashboard data
+     */
+    const fetchDashboardData = useCallback(async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            
+            // Fetch all data in parallel for better performance
+            const [appointments, prescriptions, reports, records] = await Promise.allSettled([
+                getUpcomingAppointments(),
+                getActivePrescriptions(),
+                getRecentReports(),
+                getMedicalRecords()
+            ]);
+            
+            // Update state with fetched data (handle both success and failure cases)
+            if (appointments.status === 'fulfilled' && appointments.value) {
+                setUpcomingAppointments(appointments.value);
+            }
+            
+            if (prescriptions.status === 'fulfilled' && prescriptions.value) {
+                setActivePrescriptions(prescriptions.value);
+            }
+            
+            if (reports.status === 'fulfilled' && reports.value) {
+                setRecentReports(reports.value);
+            }
+            
+            if (records.status === 'fulfilled' && records.value) {
+                setMedicalRecords(records.value);
+            }
+            
+        } catch (err) {
+            console.error("Error fetching dashboard data:", err);
+            setError("Failed to load some dashboard data. Please refresh the page.");
+        } finally {
+            setLoading(false);
         }
-    }
+    }, [patientId]);
 
     useEffect(() => {
         fetchDashboardData();
-        fetchUpcomingAppointments();
-        fetchRecentReports();
-        
-        fetchMedicalRecords();
-    }, []);
+    }, [fetchDashboardData]);
+
+    /**
+     * Format date for display
+     */
+    const formatDate = (dateString) => {
+        if (!dateString) return 'N/A';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
+    };
+
+    /**
+     * Get user's first name for greeting
+     */
+    const getFirstName = () => {
+        if (!user?.name) return 'Patient';
+        return user.name.split(' ')[0];
+    };
+
+    // Calculate stats
+    const appointmentCount = Array.isArray(upcomingAppointments) ? upcomingAppointments.length : 0;
+    const recordsCount = Array.isArray(medicalRecords) ? medicalRecords.length : 0;
+    const prescriptionCount = Array.isArray(activePrescriptions) ? activePrescriptions.length : 0;
 
     return (
         <div className="container-fluid">
-
-            {/* Title */}
+            {/* Title - Uses actual user name */}
             <PageTitle
-                title="Welcome Back, John!"
+                title={`Welcome Back, ${getFirstName()}!`}
                 subtitle="Here's an overview of your health information"
             />
 
-            {/* Stats */}
-            <div className="row g-3 mb-4">
+            {/* Error Alert */}
+            {error && (
+                <Alert variant="warning" dismissible onClose={() => setError(null)} className="mb-4">
+                    {error}
+                </Alert>
+            )}
 
-                <div className="col-md-3">
-                    <StatCard
-                        label="Upcoming Appointments"
-                        value="2"
-                        icon="bi-calendar2-week"
-                        iconColor="#0066ff"
-                    />
+            {/* Loading State */}
+            {loading ? (
+                <div className="text-center py-5">
+                    <Spinner animation="border" variant="primary" />
+                    <p className="mt-2 text-muted">Loading your dashboard...</p>
                 </div>
-
-                <div className="col-md-3">
-                    <StatCard
-                        label="Pending Bills"
-                        value="$350"
-                        icon="bi-credit-card"
-                        iconColor="#ff3b3b"
-                    />
-                </div>
-
-                <div className="col-md-3">
-                    <StatCard
-                        label="Medical Records"
-                        value="15"
-                        icon="bi-file-earmark-medical"
-                        iconColor="#00a65a"
-                    />
-                </div>
-
-                <div className="col-md-3">
-                    <StatCard
-                        label="Active Prescriptions"
-                        value="3"
-                        icon="bi-heart-pulse"
-                        iconColor="#8a2be2"
-                    />
-                </div>
-            </div>
-
-            {/* Appointments + Reports */}
-            <div className="row g-4">
-
-                {/* Appointments */}
-                <div className="col-md-6">
-                    <div className="card shadow-sm p-3 rounded-4">
-
-                        <div className="d-flex justify-content-between">
-                            <h5 className="fw-bold">Upcoming Appointments</h5>
-                            <button className="btn btn-dark btn-sm">+ Book New</button>
+            ) : (
+                <>
+                    {/* Stats - Dynamic values from API */}
+                    <div className="row g-3 mb-4">
+                        <div className="col-md-3">
+                            <StatCard
+                                label="Upcoming Appointments"
+                                value={appointmentCount.toString()}
+                                icon="bi-calendar2-week"
+                                iconColor="#0066ff"
+                            />
                         </div>
 
-                        <div className="mt-3">
-                            <AppointmentCard
-                                doctor="Dr. Smith"
-                                dept="Cardiology"
-                                date="25/01/2024"
-                                status="Confirmed"
+                        <div className="col-md-3">
+                            <StatCard
+                                label="Pending Bills"
+                                value="$0"
+                                icon="bi-credit-card"
+                                iconColor="#ff3b3b"
                             />
-                            <AppointmentCard
-                                doctor="Dr. Johnson"
-                                dept="General Medicine"
-                                date="28/01/2024"
-                                status="Pending"
+                        </div>
+
+                        <div className="col-md-3">
+                            <StatCard
+                                label="Medical Records"
+                                value={recordsCount.toString()}
+                                icon="bi-file-earmark-medical"
+                                iconColor="#00a65a"
+                            />
+                        </div>
+
+                        <div className="col-md-3">
+                            <StatCard
+                                label="Active Prescriptions"
+                                value={prescriptionCount.toString()}
+                                icon="bi-heart-pulse"
+                                iconColor="#8a2be2"
                             />
                         </div>
                     </div>
-                </div>
 
-                {/* Reports */}
-                <div className="col-md-6">
-                    <div className="card shadow-sm p-3 rounded-4">
-                        <div className="d-flex justify-content-between">
-                            <h5 className="fw-bold">Recent Reports</h5>
-                            <button className="btn btn-outline-dark btn-sm">
-                                View All
-                            </button>
+                    {/* Appointments + Reports */}
+                    <div className="row g-4">
+                        {/* Appointments */}
+                        <div className="col-md-6">
+                            <div className="card shadow-sm p-3 rounded-4">
+                                <div className="d-flex justify-content-between">
+                                    <h5 className="fw-bold">Upcoming Appointments</h5>
+                                    <button 
+                                        className="btn btn-dark btn-sm"
+                                        onClick={() => navigate('/patient/appointments/1')}
+                                    >
+                                        + Book New
+                                    </button>
+                                </div>
+
+                                <div className="mt-3">
+                                    {upcomingAppointments.length === 0 ? (
+                                        <p className="text-muted text-center py-3">
+                                            No upcoming appointments
+                                        </p>
+                                    ) : (
+                                        upcomingAppointments.slice(0, 3).map((appointment, index) => (
+                                            <AppointmentCard
+                                                key={appointment.id || index}
+                                                doctor={appointment.doctorName || 'Doctor'}
+                                                dept={appointment.department || 'General'}
+                                                date={formatDate(appointment.appointmentDate)}
+                                                status={appointment.status || 'Pending'}
+                                            />
+                                        ))
+                                    )}
+                                </div>
+                            </div>
                         </div>
 
-                        <div className="mt-3">
-                            <ReportCard
-                                title="Blood Test Results"
-                                doctor="Dr. Smith"
-                                status="Normal"
-                                date="20/01/2024"
-                            />
-                            <ReportCard
-                                title="X-Ray Report"
-                                doctor="Dr. Davis"
-                                status="Under Review"
-                                date="18/01/2024"
-                            />
+                        {/* Reports */}
+                        <div className="col-md-6">
+                            <div className="card shadow-sm p-3 rounded-4">
+                                <div className="d-flex justify-content-between">
+                                    <h5 className="fw-bold">Recent Reports</h5>
+                                    <button 
+                                        className="btn btn-outline-dark btn-sm"
+                                        onClick={() => navigate('/patient/records')}
+                                    >
+                                        View All
+                                    </button>
+                                </div>
+
+                                <div className="mt-3">
+                                    {recentReports.length === 0 ? (
+                                        <p className="text-muted text-center py-3">
+                                            No recent reports
+                                        </p>
+                                    ) : (
+                                        recentReports.slice(0, 3).map((report, index) => (
+                                            <ReportCard
+                                                key={report.id || index}
+                                                title={report.title || report.testName || 'Report'}
+                                                doctor={report.doctorName || 'Doctor'}
+                                                status={report.status || 'Pending'}
+                                                date={formatDate(report.reportDate)}
+                                            />
+                                        ))
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-            </div>
+                    {/* Quick Actions */}
+                    <div className="mt-5">
+                        <h5 className="fw-bold mb-3">Quick Actions</h5>
 
-            {/* Quick Actions */}
-            <div className="mt-5">
-                <h5 className="fw-bold mb-3">Quick Actions</h5>
+                        <div className="row g-3">
+                            <div className="col-md-3">
+                                <QuickActionCard 
+                                    icon="bi-calendar2-plus" 
+                                    label="Book Appointment" 
+                                    onClick={() => navigate('/patient/appointments/1')}
+                                />
+                            </div>
 
-                <div className="row g-3">
-                    <div className="col-md-3">
-                        <QuickActionCard icon="bi-calendar2-plus" label="Book Appointment" />
+                            <div className="col-md-3">
+                                <QuickActionCard 
+                                    icon="bi-wallet2" 
+                                    label="Pay Bills" 
+                                    onClick={() => navigate('/patient/payments')}
+                                />
+                            </div>
+
+                            <div className="col-md-3">
+                                <QuickActionCard 
+                                    icon="bi-file-earmark-text" 
+                                    label="View Records" 
+                                    onClick={() => navigate('/patient/records')}
+                                />
+                            </div>
+
+                            <div className="col-md-3">
+                                <QuickActionCard 
+                                    icon="bi-telephone" 
+                                    label="Emergency Contacts" 
+                                    onClick={() => navigate('/patient/emergency')}
+                                />
+                            </div>
+                        </div>
                     </div>
-
-                    <div className="col-md-3">
-                        <QuickActionCard icon="bi-wallet2" label="Pay Bills" />
-                    </div>
-
-                    <div className="col-md-3">
-                        <QuickActionCard icon="bi-file-earmark-text" label="View Records" />
-                    </div>
-
-                    <div className="col-md-3">
-                        <QuickActionCard icon="bi-heart-pulse" label="Health History" />
-                    </div>
-                </div>
-            </div>
+                </>
+            )}
         </div>
     );
 }
