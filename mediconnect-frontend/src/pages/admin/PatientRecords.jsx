@@ -47,9 +47,7 @@ export default function PatientRecords1() {
     }
   };
 
-  useEffect(() => {
-    fetchMedicalRecords();
-  }, []);
+  
 
 
   useEffect(() => {
@@ -94,6 +92,11 @@ export default function PatientRecords1() {
     setSelectedAppointmentId(filteredRecords[0]?.appointmentId || null);
   }, [filteredRecords]);
 
+
+useEffect(() => {
+    fetchMedicalRecords();
+  }, []);
+
   /* ================= ADD RECORD ================= */
 
   const handleAddRecord = async () => {
@@ -112,6 +115,7 @@ export default function PatientRecords1() {
         headers: { "Content-Type": "multipart/form-data" }
       });
 
+
       await fetchMedicalRecords();
 
       // reset modal
@@ -128,33 +132,58 @@ export default function PatientRecords1() {
 
 
   const handleExport = async () => {
-    if (!selected) {
-      alert("Please select a record first");
-      return;
+  if (!selected) {
+    alert("Please select a record first");
+    return;
+  }
+
+  /* 
+      DOWNLOAD (ADMIN)
+ */
+  try {
+    const res = await api.get(
+      `/admin/medical-records/${selected.id}/download`,
+      { responseType: "blob" }
+    );
+
+    const blob = new Blob([res.data]);
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = selected.title;
+    document.body.appendChild(link);
+    link.click();
+
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error("Download failed", err);
+    alert("File download failed");
+    return; 
+  }
+
+  /* 
+     EMAIL (PATIENT + DOCTOR)
+   */
+  try {
+    await api.post(
+      `/admin/medical-records/${selected.id}/send`
+    );
+
+    alert("File downloaded and emailed successfully");
+  } catch (err) {
+    console.error("Email failed", err);
+
+    if (err.response) {
+      console.error("Status:", err.response.status);
+      console.error("Data:", err.response.data);
     }
 
-    try {
-      const response = await api.get(
-        `/admin/medical-records/${selected.id}/download`,
-        { responseType: "blob" }
-      );
+    alert("Email failed (check backend logs)");
+  }
+};
 
-      const blob = new Blob([response.data]);
-      const url = window.URL.createObjectURL(blob);
-
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = selected.title; 
-      document.body.appendChild(link);
-      link.click();
-
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Export failed", error);
-      alert("File download failed");
-    }
-  };
 
 
 
