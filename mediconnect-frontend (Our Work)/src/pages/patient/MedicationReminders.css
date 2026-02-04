@@ -1,0 +1,153 @@
+.medication-page {
+    animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Stats Section */
+.med-stats-card {
+    background: var(--card-bg);
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+}
+
+.med-stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Medication Grid Items */
+.med-grid-card {
+    background: var(--card-bg);
+    border-radius: 24px;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.med-grid-card:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-8px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
+.med-grid-card.inactive {
+    opacity: 0.7;
+    filter: grayscale(0.5);
+}
+
+.med-icon-box {
+    width: 54px;
+    height: 54px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px;
+    background: var(--primary-color);
+    color: white;
+    box-shadow: 0 8px 16px rgba(var(--primary-color-rgb), 0.2);
+}
+
+.timing-badge {
+    padding: 6px 14px;
+    border-radius: 12px;
+    background: var(--card-inner-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.instruction-box {
+    background: rgba(var(--primary-color-rgb), 0.05);
+    border-left: 3px solid var(--primary-color);
+    padding: 12px;
+    border-radius: 0 12px 12px 0;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+/* Empty State */
+.med-empty-state {
+    padding: 80px 20px;
+    text-align: center;
+    background: var(--card-bg);
+    border-radius: 30px;
+    border: 2px dashed var(--border-color);
+}
+
+.empty-icon-wrapper {
+    width: 120px;
+    height: 120px;
+    background: var(--card-inner-bg);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    color: var(--primary-color);
+}
+
+/* Custom Toggle */
+.custom-switch .form-check-input {
+    width: 3em;
+    height: 1.5em;
+    cursor: pointer;
+}
+
+/* Modal Enhancements */
+.premium-modal .modal-content {
+    border-radius: 28px;
+    border: none;
+    background: var(--card-bg);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
+}
+
+.premium-modal .modal-header {
+    border-bottom: none;
+    padding: 32px 32px 0;
+}
+
+.premium-modal .modal-body {
+    padding: 32px;
+}
+
+.premium-modal .modal-footer {
+    border-top: none;
+    padding: 0 32px 32px;
+}
+
+/* Typography & General */
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: var(--text-color);
+}
+
+[data-theme='dark'] .bg-light {
+    background-color: var(--card-inner-bg) !important;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsiveness */
+@media (max-width: 768px) {
+    .medication-page {
+        padding: 1rem !important;
+    }
+}
